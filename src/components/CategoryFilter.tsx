@@ -8,7 +8,7 @@ interface CategoryFilterProps {
 
 const CategoryFilter = ({ selected, onSelect }: CategoryFilterProps) => {
   return (
-    <div className="sticky top-16 z-40 border-b border-border bg-card/80 backdrop-blur-xl">
+    <div className="border-b border-border bg-card/80 backdrop-blur-xl">
       <div className="mx-auto max-w-[1800px] px-4 md:px-6">
         <div className="flex gap-2 overflow-x-auto py-3 scrollbar-hide">
           {categories.map((cat) => (
