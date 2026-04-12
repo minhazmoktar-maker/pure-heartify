@@ -19,6 +19,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/watch/:videoId" element={<Watch />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
