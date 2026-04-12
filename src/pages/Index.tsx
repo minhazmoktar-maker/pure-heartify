@@ -1,19 +1,21 @@
 import { useState } from "react";
-import { Video, Headphones, Loader2 } from "lucide-react";
+import { Video, Headphones, Loader2, LayoutGrid, Sparkles } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import HalalCategoryFilter from "@/components/HalalCategoryFilter";
 import YouTubeVideoCard from "@/components/YouTubeVideoCard";
 import AudioSection from "@/components/AudioSection";
 import AudioPlayer from "@/components/AudioPlayer";
+import CuratedSectionRow from "@/components/CuratedSectionRow";
 import { useYouTubeVideos } from "@/hooks/useYouTubeVideos";
 import { type HalalCategory } from "@/services/youtube";
+import { CURATED_SECTIONS } from "@/data/curatedSections";
 import { cn } from "@/lib/utils";
 
-type MainTab = "videos" | "listen";
+type MainTab = "videos" | "listen" | "curated";
 
 const Index = () => {
-  const [mainTab, setMainTab] = useState<MainTab>("videos");
+  const [mainTab, setMainTab] = useState<MainTab>("curated");
   const [selectedCategory, setSelectedCategory] = useState<HalalCategory>("All");
 
   const { data: videos, isLoading, error } = useYouTubeVideos(selectedCategory);
@@ -27,6 +29,18 @@ const Index = () => {
       <div className="sticky top-16 z-40 border-b border-border bg-card/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1800px] items-center gap-0 px-4 md:px-6">
           <button
+            onClick={() => setMainTab("curated")}
+            className={cn(
+              "flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition-colors",
+              mainTab === "curated"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Sparkles className="h-4 w-4" />
+            For You
+          </button>
+          <button
             onClick={() => setMainTab("videos")}
             className={cn(
               "flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition-colors",
@@ -36,7 +50,7 @@ const Index = () => {
             )}
           >
             <Video className="h-4 w-4" />
-            Videos
+            Browse
           </button>
           <button
             onClick={() => setMainTab("listen")}
@@ -52,6 +66,15 @@ const Index = () => {
           </button>
         </div>
       </div>
+
+      {/* Curated "For You" tab */}
+      {mainTab === "curated" && (
+        <main className="mx-auto max-w-[1800px] px-4 py-2 md:px-6">
+          {CURATED_SECTIONS.map((section) => (
+            <CuratedSectionRow key={section.id} section={section} />
+          ))}
+        </main>
+      )}
 
       {mainTab === "videos" && (
         <>
