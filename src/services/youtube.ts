@@ -43,7 +43,9 @@ const SOFT_REJECT_PATTERNS = [
 const BAD_EMOJIS = /[💃🍺🎉😍🔥🍷🎰💋👙🩱🕺]/;
 
 // ── Halal scoring ──────────────────────────────────────────────────
-function halalScore(title: string, description: string, channelTitle: string): number {
+import { isTrustedChannel } from "@/data/trustedChannels";
+
+export function halalScore(title: string, description: string, channelTitle: string): number {
   const text = `${title} ${description} ${channelTitle}`.toLowerCase();
 
   // Hard reject
@@ -74,13 +76,12 @@ function halalScore(title: string, description: string, channelTitle: string): n
   // +20 clean wording
   score += 20;
 
-  // +20 trusted channel indicators
-  const trustedIndicators = [
-    "official", "academy", "institute", "studio", "foundation",
-    "media", "tv", "network", "podcast",
-  ];
-  if (trustedIndicators.some((t) => channelTitle.toLowerCase().includes(t))) score += 20;
-  else score += 10; // partial
+  // +25 trusted channel (up from 20), +5 unknown
+  if (isTrustedChannel(channelTitle)) {
+    score += 25;
+  } else {
+    score += 5;
+  }
 
   // +20 no suspicious keywords already passed
   score += 20;
