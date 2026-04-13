@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PlayerProvider } from "@/contexts/PlayerContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import Index from "./pages/Index.tsx";
 import Watch from "./pages/Watch.tsx";
 import SearchResults from "./pages/SearchResults.tsx";
@@ -21,8 +22,9 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <PlayerProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <PlayerProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -41,7 +43,8 @@ const App = () => (
           </BrowserRouter>
         </PlayerProvider>
       </AuthProvider>
-    </TooltipProvider>
+    </ThemeProvider>
+  </TooltipProvider>
   </QueryClientProvider>
 );
 
