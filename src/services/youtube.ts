@@ -1,54 +1,40 @@
-const API_KEY = "AIzaSyApFYC1PRsrAvHeTmx5XWqQI57lxKGFNfY";
-const BASE_URL = "https://www.googleapis.com/youtube/v3";
+import { supabase } from "@/integrations/supabase/client";
+import { isTrustedChannel } from "@/data/trustedChannels";
 
 // ── Hard-reject keyword lists ──────────────────────────────────────
 const HARD_REJECT_KEYWORDS = [
-  // music
   "music video", "official song", "official video", "remix", "mashup", "cover song",
   "lyrical video", "lyrics video", "audio track", "EP release", "DJ", "beat",
   "instrumental", "trap", "rap", "hip hop", "pop song", "dance music", "EDM",
   "concert", "live performance", "stage performance", "karaoke",
-  // dance
   "dance", "dancing", "choreography", "tiktok", "viral dance", "trending dance",
   "dance challenge", "lip sync", "lip-sync",
-  // sexual / romance
   "sexy", "hot girl", "beautiful girl", "model", "bikini", "swimsuit", "lingerie",
   "fashion show", "ramp walk", "bold", "seductive", "kissing", "romance scene",
   "love scene", "couple goals", "girlfriend", "boyfriend", "dating", "crush",
   "relationship goals", "valentine", "hookup", "only fan",
-  // alcohol / gambling
   "alcohol", "wine", "beer", "whisky", "vodka", "bar", "nightclub", "clubbing",
   "party night", "rave", "casino", "gambling", "betting", "poker", "lottery",
-  // profanity (partial)
   "fuck", "shit", "bitch", "bastard",
-  // gaming / entertainment
   "gameplay", "gaming", "live stream gaming", "GTA", "shooting game", "battle royale",
   "prank", "trolling", "reaction video", "funny moments", "comedy skit",
   "meme compilation", "roast", "drama", "celebrity gossip", "controversy",
   "exposed", "viral clip", "shocking video",
-  // non-English
   "pyar", "mohabbat", "ladki", "sharab", "jua", "nach",
   "حب", "اغنية", "رقص",
 ];
 
 const SOFT_REJECT_PATTERNS = [
-  /you won't believe/i,
-  /shocking/i,
-  /gone wrong/i,
-  /\#viral/i,
-  /\#fyp/i,
-  /\#trending/i,
+  /you won't believe/i, /shocking/i, /gone wrong/i,
+  /\#viral/i, /\#fyp/i, /\#trending/i,
 ];
 
 const BAD_EMOJIS = /[💃🍺🎉😍🔥🍷🎰💋👙🩱🕺]/;
 
 // ── Halal scoring ──────────────────────────────────────────────────
-import { isTrustedChannel } from "@/data/trustedChannels";
-
 export function halalScore(title: string, description: string, channelTitle: string): number {
   const text = `${title} ${description} ${channelTitle}`.toLowerCase();
 
-  // Hard reject
   for (const kw of HARD_REJECT_KEYWORDS) {
     if (text.includes(kw.toLowerCase())) return 0;
   }
@@ -59,7 +45,6 @@ export function halalScore(title: string, description: string, channelTitle: str
 
   let score = 0;
 
-  // +40 Islamic / educational value
   const islamicKeywords = [
     "quran", "surah", "hadith", "sunnah", "prophet", "allah", "islam",
     "deen", "tafsir", "khutbah", "jummah", "ramadan", "eid", "hajj",
@@ -73,17 +58,14 @@ export function halalScore(title: string, description: string, channelTitle: str
   ];
   if (islamicKeywords.some((k) => text.includes(k))) score += 40;
 
-  // +20 clean wording
   score += 20;
 
-  // +25 trusted channel (up from 20), +5 unknown
   if (isTrustedChannel(channelTitle)) {
     score += 25;
   } else {
     score += 5;
   }
 
-  // +20 no suspicious keywords already passed
   score += 20;
 
   return score;
@@ -91,14 +73,8 @@ export function halalScore(title: string, description: string, channelTitle: str
 
 // ── Category classifier ────────────────────────────────────────────
 export type HalalCategory =
-  | "All"
-  | "Islamic"
-  | "Education"
-  | "Business"
-  | "Self-Improvement"
-  | "Nasheeds"
-  | "Quran"
-  | "Lectures";
+  | "All" | "Islamic" | "Education" | "Business"
+  | "Self-Improvement" | "Nasheeds" | "Quran" | "Lectures";
 
 function classifyCategory(title: string, description: string): HalalCategory {
   const t = `${title} ${description}`.toLowerCase();
@@ -125,17 +101,19 @@ export interface YouTubeVideo {
 }
 
 const SEARCH_QUERIES = [
-  "Islamic reminder",
-  "Quran recitation beautiful",
-  "self improvement discipline Islam",
-  "halal business motivation",
-  "Quran tafsir",
-  "nasheed no music",
-  "Islamic lecture",
-  "dua dhikr morning",
-  "Muslim productivity",
-  "seerah Prophet Muhammad",
+  "Islamic reminder", "Quran recitation beautiful",
+  "self improvement discipline Islam", "halal business motivation",
+  "Quran tafsir", "nasheed no music", "Islamic lecture",
+  "dua dhikr morning", "Muslim productivity", "seerah Prophet Muhammad",
 ];
+
+async function callYouTubeProxy(query: string, maxResults: number) {
+  const { data, error } = await supabase.functions.invoke("youtube-proxy", {
+    body: { query, maxResults },
+  });
+  if (error) throw new Error(error.message || "YouTube proxy error");
+  return data;
+}
 
 export async function fetchHalalVideos(
   query?: string,
@@ -143,21 +121,7 @@ export async function fetchHalalVideos(
 ): Promise<YouTubeVideo[]> {
   const q = query || SEARCH_QUERIES[Math.floor(Math.random() * SEARCH_QUERIES.length)];
 
-  const params = new URLSearchParams({
-    part: "snippet",
-    q,
-    type: "video",
-    maxResults: String(Math.min(maxResults * 2, 50)), // fetch extra to account for filtering
-    safeSearch: "strict",
-    relevanceLanguage: "en",
-    key: API_KEY,
-  });
-
-  const res = await fetch(`${BASE_URL}/search?${params}`);
-  if (!res.ok) {
-    throw new Error(`YouTube API error: ${res.status}`);
-  }
-  const data = await res.json();
+  const data = await callYouTubeProxy(q, Math.min(maxResults * 2, 50));
 
   const approved: YouTubeVideo[] = [];
 
@@ -180,8 +144,7 @@ export async function fetchHalalVideos(
       thumbnailUrl:
         snippet.thumbnails?.high?.url ??
         snippet.thumbnails?.medium?.url ??
-        snippet.thumbnails?.default?.url ??
-        "",
+        snippet.thumbnails?.default?.url ?? "",
       channelTitle: channel,
       category: classifyCategory(title, desc),
       halalScore: score,
@@ -199,7 +162,6 @@ export async function fetchMultiQueryVideos(maxTotal = 24): Promise<YouTubeVideo
   const allResults: YouTubeVideo[] = [];
   const seenIds = new Set<string>();
 
-  // Fetch from multiple queries in parallel (batches of 3)
   for (let i = 0; i < SEARCH_QUERIES.length; i += 3) {
     const batch = SEARCH_QUERIES.slice(i, i + 3);
     const results = await Promise.all(

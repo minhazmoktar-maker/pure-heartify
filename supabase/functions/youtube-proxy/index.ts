@@ -1,4 +1,7 @@
-import { corsHeaders } from "@supabase/supabase-js/cors";
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 const YOUTUBE_API_KEY = Deno.env.get("YOUTUBE_API_KEY");
 const BASE_URL = "https://www.googleapis.com/youtube/v3";
