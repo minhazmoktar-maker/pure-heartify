@@ -1,10 +1,12 @@
-import { Search, Menu, Bell, User } from "lucide-react";
+import { Search, Menu, Bell, User, LogOut } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,14 +24,14 @@ const Navbar = () => {
           <button className="rounded-lg p-2 hover:bg-secondary transition-colors">
             <Menu className="h-5 w-5 text-foreground" />
           </button>
-          <a href="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
               <span className="text-sm font-bold text-primary-foreground">H</span>
             </div>
             <span className="hidden font-heading text-xl font-bold text-foreground sm:block">
-              Halal<span className="text-gold">Tube</span>
+              Halal<span className="text-[hsl(var(--gold))]">Tube</span>
             </span>
-          </a>
+          </Link>
         </div>
 
         {/* Center — Search */}
@@ -50,12 +52,33 @@ const Navbar = () => {
 
         {/* Right */}
         <div className="flex items-center gap-1">
-          <button className="rounded-full p-2 hover:bg-secondary transition-colors">
-            <Bell className="h-5 w-5 text-foreground" />
-          </button>
-          <button className="flex h-8 w-8 items-center justify-center rounded-full bg-primary transition-colors hover:opacity-90">
-            <User className="h-4 w-4 text-primary-foreground" />
-          </button>
+          {user ? (
+            <>
+              <button className="rounded-full p-2 hover:bg-secondary transition-colors">
+                <Bell className="h-5 w-5 text-foreground" />
+              </button>
+              <button
+                onClick={signOut}
+                className="rounded-full p-2 hover:bg-secondary transition-colors"
+                title="Sign out"
+              >
+                <LogOut className="h-5 w-5 text-foreground" />
+              </button>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary transition-colors">
+                <span className="text-xs font-bold text-primary-foreground">
+                  {user.email?.charAt(0).toUpperCase() ?? "U"}
+                </span>
+              </div>
+            </>
+          ) : (
+            <Link
+              to="/login"
+              className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90"
+            >
+              <User className="h-4 w-4" />
+              Sign In
+            </Link>
+          )}
         </div>
       </div>
     </nav>
