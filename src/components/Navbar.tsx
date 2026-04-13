@@ -8,6 +8,7 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +54,13 @@ const Navbar = () => {
 
         {/* Right */}
         <div className="flex items-center gap-1">
+          <button
+            onClick={toggleTheme}
+            className="rounded-full p-2 hover:bg-secondary transition-colors"
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {theme === "dark" ? <Sun className="h-5 w-5 text-foreground" /> : <Moon className="h-5 w-5 text-foreground" />}
+          </button>
           {user ? (
             <>
               <button className="rounded-full p-2 hover:bg-secondary transition-colors">
