@@ -1,9 +1,18 @@
 import { Search, Menu, Bell, User } from "lucide-react";
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (q) {
+      navigate(`/search?q=${encodeURIComponent(q)}`);
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
@@ -25,7 +34,7 @@ const Navbar = () => {
 
         {/* Center — Search */}
         <div className="flex max-w-xl flex-1 items-center">
-          <div className="relative flex w-full">
+          <form onSubmit={handleSearch} className="relative flex w-full">
             <input
               type="text"
               placeholder="Search halal content..."
@@ -33,10 +42,10 @@ const Navbar = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-10 w-full rounded-l-full border border-border bg-background px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
             />
-            <button className="flex h-10 items-center justify-center rounded-r-full border border-l-0 border-border bg-secondary px-5 hover:bg-muted transition-colors">
+            <button type="submit" className="flex h-10 items-center justify-center rounded-r-full border border-l-0 border-border bg-secondary px-5 hover:bg-muted transition-colors">
               <Search className="h-4 w-4 text-foreground" />
             </button>
-          </div>
+          </form>
         </div>
 
         {/* Right */}
