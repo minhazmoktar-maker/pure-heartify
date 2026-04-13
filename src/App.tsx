@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { PlayerProvider } from "@/contexts/PlayerContext";
 import Index from "./pages/Index.tsx";
 import Watch from "./pages/Watch.tsx";
+import SearchResults from "./pages/SearchResults.tsx";
+import SectionAll from "./pages/SectionAll.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -20,6 +22,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/watch/:videoId" element={<Watch />} />
+            <Route path="/search" element={<SearchResults />} />
+            <Route path="/section/:sectionId" element={<SectionAll />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

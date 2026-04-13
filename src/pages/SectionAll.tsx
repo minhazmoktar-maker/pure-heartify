@@ -1,0 +1,87 @@
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Loader2, ShieldCheck } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import YouTubeVideoCard from "@/components/YouTubeVideoCard";
+import { CURATED_SECTIONS } from "@/data/curatedSections";
+import { useCuratedSection } from "@/hooks/useCuratedSection";
+import { isTrustedChannel } from "@/data/trustedChannels";
+import { Badge } from "@/components/ui/badge";
+
+const SectionAll = () => {
+  const { sectionId } = useParams<{ sectionId: string }>();
+  const navigate = useNavigate();
+
+  const section = CURATED_SECTIONS.find((s) => s.id === sectionId);
+
+  // Create an expanded version of the section with more results
+  const expandedSection = section
+    ? { ...section, maxResults: 60 }
+    : null;
+
+  const { data: videos, isLoading } = useCuratedSection(expandedSection!);
+
+  if (!section) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="py-20 text-center">
+          <p className="text-lg font-medium text-muted-foreground">Section not found.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background pb-12">
+      <Navbar />
+
+      <div className="mx-auto max-w-[1800px] px-4 py-6 md:px-6">
+        <button
+          onClick={() => navigate("/")}
+          className="mb-4 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to For You
+        </button>
+
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-foreground">
+            {section.icon} {section.title}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">{section.description}</p>
+        </div>
+
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Loading content…</p>
+          </div>
+        )}
+
+        {!isLoading && videos && (
+          <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {videos.map((v, i) => (
+              <div key={v.id}>
+                <YouTubeVideoCard video={v} index={i} />
+                {isTrustedChannel(v.channelTitle) && (
+                  <Badge variant="secondary" className="mt-1.5 gap-1 text-[10px]">
+                    <ShieldCheck className="h-3 w-3 text-primary" />
+                    Trusted Channel
+                  </Badge>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!isLoading && videos?.length === 0 && (
+          <div className="py-20 text-center">
+            <p className="text-lg font-medium text-muted-foreground">No content found for this section.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default SectionAll;

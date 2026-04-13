@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight, Loader2, ShieldCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { type CuratedSection } from "@/data/curatedSections";
 import { useCuratedSection } from "@/hooks/useCuratedSection";
 import YouTubeVideoCard from "@/components/YouTubeVideoCard";
@@ -13,6 +14,7 @@ interface Props {
 const CuratedSectionRow = ({ section }: Props) => {
   const { data: videos, isLoading } = useCuratedSection(section);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const scroll = (dir: "left" | "right") => {
     scrollRef.current?.scrollBy({ left: dir === "left" ? -400 : 400, behavior: "smooth" });
@@ -39,7 +41,13 @@ const CuratedSectionRow = ({ section }: Props) => {
           <h2 className="text-lg font-bold text-foreground">{section.icon} {section.title}</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">{section.description}</p>
         </div>
-        <div className="flex shrink-0 gap-1">
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            onClick={() => navigate(`/section/${section.id}`)}
+            className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          >
+            Show All
+          </button>
           <button onClick={() => scroll("left")} className="rounded-full border border-border p-1.5 text-muted-foreground hover:text-foreground transition-colors">
             <ChevronLeft className="h-4 w-4" />
           </button>
