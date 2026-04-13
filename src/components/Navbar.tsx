@@ -1,4 +1,5 @@
-import { Search, Menu, Bell, User, LogOut } from "lucide-react";
+import { Search, Menu, Bell, User, LogOut, Moon, Sun } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
