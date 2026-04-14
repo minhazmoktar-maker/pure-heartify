@@ -6,11 +6,13 @@ import { isTrustedChannel } from "@/data/trustedChannels";
 const HOME_SECTION_QUERY_BUDGET = 1;
 const EXPANDED_SECTION_QUERY_BUDGET = 3;
 
-export function useCuratedSection(section: CuratedSection, enabled = true) {
+export function useCuratedSection(section?: CuratedSection | null, enabled = true) {
   return useQuery<YouTubeVideo[]>({
-    queryKey: ["curated", section.id, section.maxResults],
-    enabled,
+    queryKey: ["curated", section?.id ?? "missing", section?.maxResults ?? 0],
+    enabled: !!section && enabled,
     queryFn: async () => {
+      if (!section) return [];
+
       const allResults: YouTubeVideo[] = [];
       const seenIds = new Set<string>();
       const queryBudget = section.maxResults > 24 ? EXPANDED_SECTION_QUERY_BUDGET : HOME_SECTION_QUERY_BUDGET;

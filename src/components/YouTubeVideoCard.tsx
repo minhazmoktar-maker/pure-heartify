@@ -11,15 +11,20 @@ interface YouTubeVideoCardProps {
   inApp?: boolean;
 }
 
-const YouTubeVideoCard = ({ video, index, inApp }: YouTubeVideoCardProps) => {
+const YouTubeVideoCard = ({ video, index }: YouTubeVideoCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
   const timeAgo = formatTimeAgo(video.publishedAt);
   const liked = isFavorite(video.id);
+  const isEmbeddableVideo = /^[a-zA-Z0-9_-]{11}$/.test(video.id);
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    if (!isEmbeddableVideo) {
+      window.open(video.videoUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
     navigate(`/watch/${video.id}`);
   };
 
@@ -39,7 +44,7 @@ const YouTubeVideoCard = ({ video, index, inApp }: YouTubeVideoCardProps) => {
 
   const handleDownload = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.open(video.videoUrl, "_blank");
+    window.open(video.videoUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -50,7 +55,6 @@ const YouTubeVideoCard = ({ video, index, inApp }: YouTubeVideoCardProps) => {
       className="group cursor-pointer"
       onClick={handleClick}
     >
-      {/* Thumbnail */}
       <div className="relative overflow-hidden rounded-xl">
         <img
           src={video.thumbnailUrl}
@@ -58,45 +62,40 @@ const YouTubeVideoCard = ({ video, index, inApp }: YouTubeVideoCardProps) => {
           loading="lazy"
           className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        {/* Halal score badge */}
         <span className="absolute bottom-2 left-2 flex items-center gap-1 rounded-md bg-primary/90 px-1.5 py-0.5 text-xs font-medium text-primary-foreground">
           <Shield className="h-3 w-3" />
           {video.halalScore}%
         </span>
-        {/* Category badge */}
-        <span className="absolute top-2 right-2 rounded-md bg-foreground/70 px-1.5 py-0.5 text-xs font-medium text-background">
+        <span className="absolute right-2 top-2 rounded-md bg-foreground/70 px-1.5 py-0.5 text-xs font-medium text-background">
           {video.category}
         </span>
-        {/* Action buttons */}
-        <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute left-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
           <button
             onClick={handleBookmark}
-            className="rounded-full bg-background/80 p-1.5 backdrop-blur-sm hover:bg-background transition-colors"
+            className="rounded-full bg-background/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-background"
             title={liked ? "Remove bookmark" : "Bookmark"}
           >
             <Heart className={`h-4 w-4 ${liked ? "fill-red-500 text-red-500" : "text-foreground"}`} />
           </button>
           <button
             onClick={handleDownload}
-            className="rounded-full bg-background/80 p-1.5 backdrop-blur-sm hover:bg-background transition-colors"
-            title="Open on YouTube"
+            className="rounded-full bg-background/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-background"
+            title={isEmbeddableVideo ? "Open on YouTube" : "Open search results"}
           >
             <Download className="h-4 w-4 text-foreground" />
           </button>
         </div>
-        {/* Hover overlay */}
         <div className="absolute inset-0 flex items-center justify-center bg-primary/10 opacity-0 transition-opacity group-hover:opacity-100">
-          <Play className="h-10 w-10 text-primary-foreground drop-shadow-lg fill-primary-foreground" />
+          <Play className="h-10 w-10 fill-primary-foreground text-primary-foreground drop-shadow-lg" />
         </div>
       </div>
 
-      {/* Info */}
       <div className="mt-3 flex gap-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
           {video.channelTitle[0]}
         </div>
         <div className="min-w-0">
-          <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-foreground group-hover:text-primary transition-colors">
+          <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
             {video.title}
           </h3>
           <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
