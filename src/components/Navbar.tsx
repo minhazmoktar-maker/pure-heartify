@@ -73,11 +73,15 @@ const Navbar = () => {
               >
                 <LogOut className="h-5 w-5 text-foreground" />
               </button>
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary transition-colors">
+              <Link
+                to="/profile"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-primary transition-colors hover:opacity-90"
+                title="Profile"
+              >
                 <span className="text-xs font-bold text-primary-foreground">
                   {user.email?.charAt(0).toUpperCase() ?? "U"}
                 </span>
-              </div>
+              </Link>
             </>
           ) : (
             <Link

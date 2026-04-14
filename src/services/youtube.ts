@@ -68,7 +68,7 @@ export function halalScore(title: string, description: string, channelTitle: str
 
   score += 20;
 
-  return score;
+  return Math.min(score, 95);
 }
 
 // ── Category classifier ────────────────────────────────────────────

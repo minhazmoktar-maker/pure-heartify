@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CheckCircle2, Play, Shield } from "lucide-react";
+import { CheckCircle2, Play, Shield, Heart, Download } from "lucide-react";
 import type { YouTubeVideo } from "@/services/youtube";
+import { useFavorites } from "@/hooks/useFavorites";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface YouTubeVideoCardProps {
   video: YouTubeVideo;
@@ -11,11 +13,33 @@ interface YouTubeVideoCardProps {
 
 const YouTubeVideoCard = ({ video, index, inApp }: YouTubeVideoCardProps) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const timeAgo = formatTimeAgo(video.publishedAt);
+  const liked = isFavorite(video.id);
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     navigate(`/watch/${video.id}`);
+  };
+
+  const handleBookmark = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    toggleFavorite.mutate({
+      videoId: video.id,
+      title: video.title,
+      channel: video.channelTitle,
+      thumbnail: video.thumbnailUrl,
+    });
+  };
+
+  const handleDownload = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.open(video.videoUrl, "_blank");
   };
 
   return (
@@ -43,6 +67,23 @@ const YouTubeVideoCard = ({ video, index, inApp }: YouTubeVideoCardProps) => {
         <span className="absolute top-2 right-2 rounded-md bg-foreground/70 px-1.5 py-0.5 text-xs font-medium text-background">
           {video.category}
         </span>
+        {/* Action buttons */}
+        <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={handleBookmark}
+            className="rounded-full bg-background/80 p-1.5 backdrop-blur-sm hover:bg-background transition-colors"
+            title={liked ? "Remove bookmark" : "Bookmark"}
+          >
+            <Heart className={`h-4 w-4 ${liked ? "fill-red-500 text-red-500" : "text-foreground"}`} />
+          </button>
+          <button
+            onClick={handleDownload}
+            className="rounded-full bg-background/80 p-1.5 backdrop-blur-sm hover:bg-background transition-colors"
+            title="Open on YouTube"
+          >
+            <Download className="h-4 w-4 text-foreground" />
+          </button>
+        </div>
         {/* Hover overlay */}
         <div className="absolute inset-0 flex items-center justify-center bg-primary/10 opacity-0 transition-opacity group-hover:opacity-100">
           <Play className="h-10 w-10 text-primary-foreground drop-shadow-lg fill-primary-foreground" />
@@ -60,7 +101,7 @@ const YouTubeVideoCard = ({ video, index, inApp }: YouTubeVideoCardProps) => {
           </h3>
           <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
             <span>{video.channelTitle}</span>
-            <CheckCircle2 className="h-3.5 w-3.5 text-gold" />
+            <CheckCircle2 className="h-3.5 w-3.5 text-[hsl(var(--gold))]" />
           </div>
           <p className="text-xs text-muted-foreground">{timeAgo}</p>
         </div>
