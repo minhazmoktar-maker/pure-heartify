@@ -5,16 +5,15 @@ export function useYouTubeVideos(category: HalalCategory, searchQuery?: string) 
   return useQuery<YouTubeVideo[]>({
     queryKey: ["youtube-halal", category, searchQuery],
     queryFn: async () => {
-      let videos: YouTubeVideo[];
-      if (searchQuery) {
-        videos = await fetchHalalVideos(searchQuery, 24);
-      } else {
-        videos = await fetchMultiQueryVideos(24);
-      }
+      const videos = searchQuery
+        ? await fetchHalalVideos(searchQuery, 24)
+        : await fetchMultiQueryVideos(24);
+
       if (category === "All") return videos;
-      return videos.filter((v) => v.category === category);
+      return videos.filter((video) => video.category === category);
     },
-    staleTime: 5 * 60 * 1000, // 5 min cache
-    retry: 1,
+    staleTime: 30 * 60 * 1000,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }

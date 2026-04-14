@@ -18,7 +18,7 @@ const SectionAll = () => {
     ? { ...section, maxResults: 60 }
     : null;
 
-  const { data: videos, isLoading } = useCuratedSection(expandedSection!);
+  const { data: videos, isLoading } = useCuratedSection(expandedSection!, !!expandedSection);
 
   if (!section) {
     return (
