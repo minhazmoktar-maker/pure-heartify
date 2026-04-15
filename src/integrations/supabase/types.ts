@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      curated_videos: {
+        Row: {
+          category: string
+          channel_title: string
+          halal_score: number
+          id: string
+          ingested_at: string
+          is_trusted_channel: boolean
+          published_at: string | null
+          section_id: string | null
+          thumbnail_url: string
+          title: string
+          video_id: string
+          view_count: number
+        }
+        Insert: {
+          category?: string
+          channel_title: string
+          halal_score?: number
+          id?: string
+          ingested_at?: string
+          is_trusted_channel?: boolean
+          published_at?: string | null
+          section_id?: string | null
+          thumbnail_url?: string
+          title: string
+          video_id: string
+          view_count?: number
+        }
+        Update: {
+          category?: string
+          channel_title?: string
+          halal_score?: number
+          id?: string
+          ingested_at?: string
+          is_trusted_channel?: boolean
+          published_at?: string | null
+          section_id?: string | null
+          thumbnail_url?: string
+          title?: string
+          video_id?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           channel_title: string | null
@@ -41,6 +86,36 @@ export type Database = {
           user_id?: string
           video_id?: string
           video_title?: string | null
+        }
+        Relationships: []
+      }
+      ingestion_log: {
+        Row: {
+          created_at: string
+          id: string
+          query: string
+          quota_used: number
+          section_id: string | null
+          videos_added: number
+          videos_found: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          query: string
+          quota_used?: number
+          section_id?: string | null
+          videos_added?: number
+          videos_found?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          query?: string
+          quota_used?: number
+          section_id?: string | null
+          videos_added?: number
+          videos_found?: number
         }
         Relationships: []
       }

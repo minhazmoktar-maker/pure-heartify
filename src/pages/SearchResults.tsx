@@ -1,15 +1,12 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Search } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import YouTubeVideoCard from "@/components/YouTubeVideoCard";
-import { useYouTubeVideos } from "@/hooks/useYouTubeVideos";
+import InfiniteVideoGrid from "@/components/InfiniteVideoGrid";
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const query = searchParams.get("q") || "";
-
-  const { data: videos, isLoading, error } = useYouTubeVideos("All", query || undefined);
 
   return (
     <div className="min-h-screen bg-background pb-12">
@@ -36,34 +33,10 @@ const SearchResults = () => {
           </div>
         </div>
 
-        {isLoading && (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Searching halal content…</p>
-          </div>
-        )}
-
-        {error && (
-          <div className="py-20 text-center">
-            <p className="text-lg font-medium text-destructive">Search failed. Please try again.</p>
-          </div>
-        )}
-
-        {!isLoading && !error && videos && videos.length > 0 && (
-          <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {videos.map((v, i) => (
-              <YouTubeVideoCard key={v.id} video={v} index={i} />
-            ))}
-          </div>
-        )}
-
-        {!isLoading && !error && videos?.length === 0 && (
-          <div className="py-20 text-center">
-            <p className="text-lg font-medium text-muted-foreground">
-              No halal-compliant content found for "{query}".
-            </p>
-          </div>
-        )}
+        <InfiniteVideoGrid
+          search={query || undefined}
+          fallbackMessage={`No halal-compliant content found for "${query}".`}
+        />
       </div>
     </div>
   );
