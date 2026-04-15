@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CheckCircle2, Play, Shield, Heart, Download } from "lucide-react";
+import { CheckCircle2, Play, Shield, Heart } from "lucide-react";
 import type { YouTubeVideo } from "@/services/youtube";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,7 +8,6 @@ import { useAuth } from "@/contexts/AuthContext";
 interface YouTubeVideoCardProps {
   video: YouTubeVideo;
   index: number;
-  inApp?: boolean;
 }
 
 const YouTubeVideoCard = ({ video, index }: YouTubeVideoCardProps) => {
@@ -21,10 +20,7 @@ const YouTubeVideoCard = ({ video, index }: YouTubeVideoCardProps) => {
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!isEmbeddableVideo) {
-      window.open(video.videoUrl, "_blank", "noopener,noreferrer");
-      return;
-    }
+    if (!isEmbeddableVideo) return; // non-embeddable videos can't be played
     navigate(`/watch/${video.id}`);
   };
 
@@ -42,10 +38,7 @@ const YouTubeVideoCard = ({ video, index }: YouTubeVideoCardProps) => {
     });
   };
 
-  const handleDownload = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    window.open(video.videoUrl, "_blank", "noopener,noreferrer");
-  };
+  if (!isEmbeddableVideo) return null; // hide non-embeddable fallback videos
 
   return (
     <motion.article
@@ -69,20 +62,13 @@ const YouTubeVideoCard = ({ video, index }: YouTubeVideoCardProps) => {
         <span className="absolute right-2 top-2 rounded-md bg-foreground/70 px-1.5 py-0.5 text-xs font-medium text-background">
           {video.category}
         </span>
-        <div className="absolute left-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="absolute left-2 top-2 opacity-0 transition-opacity group-hover:opacity-100">
           <button
             onClick={handleBookmark}
             className="rounded-full bg-background/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-background"
             title={liked ? "Remove bookmark" : "Bookmark"}
           >
             <Heart className={`h-4 w-4 ${liked ? "fill-red-500 text-red-500" : "text-foreground"}`} />
-          </button>
-          <button
-            onClick={handleDownload}
-            className="rounded-full bg-background/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-background"
-            title={isEmbeddableVideo ? "Open on YouTube" : "Open search results"}
-          >
-            <Download className="h-4 w-4 text-foreground" />
           </button>
         </div>
         <div className="absolute inset-0 flex items-center justify-center bg-primary/10 opacity-0 transition-opacity group-hover:opacity-100">
