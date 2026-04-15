@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Loader2, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { type CuratedSection } from "@/data/curatedSections";
 import { useCuratedSection } from "@/hooks/useCuratedSection";
+import { useInfiniteFeed } from "@/hooks/useInfiniteFeed";
 import YouTubeVideoCard from "@/components/YouTubeVideoCard";
 import { isTrustedChannel } from "@/data/trustedChannels";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +17,25 @@ const CuratedSectionRow = ({ section }: Props) => {
   const sectionRef = useRef<HTMLElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const { data: videos, isLoading } = useCuratedSection(section, shouldLoad);
+
+  // Try DB-backed feed first
+  const { data: feedData, isLoading: feedLoading } = useInfiniteFeed({
+    sectionId: section.id,
+    limit: section.maxResults,
+    enabled: shouldLoad,
+  });
+
+  // Fallback to YouTube API if DB is empty
+  const dbVideos = feedData?.pages?.[0]?.items ?? [];
+  const useYouTubeFallback = shouldLoad && !feedLoading && dbVideos.length === 0;
+
+  const { data: ytVideos, isLoading: ytLoading } = useCuratedSection(
+    section,
+    useYouTubeFallback,
+  );
+
+  const videos = dbVideos.length > 0 ? dbVideos : (ytVideos ?? []);
+  const isLoading = feedLoading || (useYouTubeFallback && ytLoading);
 
   useEffect(() => {
     const node = sectionRef.current;

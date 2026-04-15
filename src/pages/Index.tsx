@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { Video, Headphones, Loader2, LayoutGrid, Sparkles } from "lucide-react";
+import { Video, Headphones, Loader2, Sparkles } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import HalalCategoryFilter from "@/components/HalalCategoryFilter";
-import YouTubeVideoCard from "@/components/YouTubeVideoCard";
 import AudioSection from "@/components/AudioSection";
 import AudioPlayer from "@/components/AudioPlayer";
 import CuratedSectionRow from "@/components/CuratedSectionRow";
-import { useYouTubeVideos } from "@/hooks/useYouTubeVideos";
+import InfiniteVideoGrid from "@/components/InfiniteVideoGrid";
 import { type HalalCategory } from "@/services/youtube";
 import { CURATED_SECTIONS } from "@/data/curatedSections";
 import { cn } from "@/lib/utils";
@@ -17,8 +16,6 @@ type MainTab = "videos" | "listen" | "curated";
 const Index = () => {
   const [mainTab, setMainTab] = useState<MainTab>("curated");
   const [selectedCategory, setSelectedCategory] = useState<HalalCategory>("All");
-
-  const { data: videos, isLoading, error } = useYouTubeVideos(selectedCategory);
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -80,30 +77,7 @@ const Index = () => {
         <>
           <HalalCategoryFilter selected={selectedCategory} onSelect={setSelectedCategory} />
           <main className="mx-auto max-w-[1800px] px-4 py-6 md:px-6">
-            {isLoading && (
-              <div className="flex flex-col items-center justify-center py-20 gap-3">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">Fetching halal-verified videos…</p>
-              </div>
-            )}
-            {error && (
-              <div className="py-20 text-center">
-                <p className="text-lg font-medium text-destructive">Failed to load videos. Please try again.</p>
-                <p className="mt-1 text-sm text-muted-foreground">{(error as Error).message}</p>
-              </div>
-            )}
-            {!isLoading && !error && videos && (
-              <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {videos.map((video, i) => (
-                  <YouTubeVideoCard key={video.id} video={video} index={i} />
-                ))}
-              </div>
-            )}
-            {!isLoading && !error && videos?.length === 0 && (
-              <div className="py-20 text-center">
-                <p className="text-lg font-medium text-muted-foreground">No halal-compliant content found for this category.</p>
-              </div>
-            )}
+            <InfiniteVideoGrid category={selectedCategory} />
           </main>
         </>
       )}
