@@ -91,6 +91,24 @@ const TRUSTED_CHANNELS_LOWER = [
   "quran in english", "the qari hub", "islamic ambient", "dhikr & dua",
   "heart of quran", "quran for healing", "daily dhikr", "pure quran recitation",
   "voice of iman", "the sunnah sound", "global quran channel",
+  // XVII. Halal Finance & Wealth Building
+  "islamicfinance360", "abdullah nouh", "rizqwise", "wahed invest official",
+  "halal stock news", "manzil", "islamic finance news", "zoya finance",
+  // XVIII. Elite Quran Recitation
+  "mishary rashid alafasy", "sheikh shuraim official", "sudais official",
+  "lofi holy quran studio", "habibullah tv studio", "verses of hope",
+  "islam sobhi official", "raad al kurdi", "quraan-e-pak",
+  // XIX. Podcasts & Intellectual Shows
+  "wise the dome show", "women of quran podcast", "qalam institute",
+  "the muslim footprint", "point of view podcast", "the halal life podcast",
+  "ilmfeed", "unscripted islam21c", "the deen project podcast",
+  // XX. Advanced Learning & Scholarly Archives
+  "ajmal raza qadri", "roots community", "luminous", "arabic with husna",
+  "islamic history podcast", "seekersguidance global", "the islamic journey",
+  "noor e aman",
+  // XXI. Global Channels
+  "new islamic world", "islamsays", "qari fatih seferagic",
+  "knowledge pills", "the clear message foundation", "halal parenting hub",
 ];
 
 function isTrusted(channel: string): boolean {
@@ -166,6 +184,10 @@ const SECTION_QUERIES: Record<string, string[]> = {
   "recitation-tranquility": ["Quran recitation sleep peaceful", "beautiful adhan call prayer", "ruqyah healing Quran", "morning evening dhikr dua", "Pure Quran Recitation"],
   "community-podcasts": ["Muslim podcast lifestyle", "Productive Muslim tips", "Muslim wellness mental health", "The Muslim Creative"],
   "live-streams": ["Makkah Live stream", "Madinah Live stream", "Masjid Al-Aqsa live"],
+  "halal-finance": ["halal investing 2026", "Islamic Finance Guru stocks", "Practical Islamic Finance portfolio", "Shariah compliant investing", "RizqWise financial literacy", "Zoya Finance screening"],
+  "elite-recitation": ["Mishary Rashid Alafasy full surah", "Sheikh Shuraim Quran", "Sudais Quran full", "Islam Sobhi recitation", "Raad Al Kurdi Quran", "Omar Hisham Al Arabi Quran"],
+  "intellectual-podcasts": ["The Thinking Muslim interview 2026", "Qalam Institute podcast", "Women of Quran podcast", "IlmFeed podcast", "Unscripted Islam21c", "The Deen Project podcast"],
+  "advanced-learning": ["Arabic with Husna Quranic Arabic", "SeekersGuidance Global traditional", "Al Madrasatu Al Umariyyah curriculum", "Islamic History Podcast", "LUMINOUS Al Kauthar", "Noor e Aman Prophetic"],
 };
 
 function decodeHtml(html: string): string {
