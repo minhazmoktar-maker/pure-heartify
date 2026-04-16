@@ -256,6 +256,63 @@ export const TRUSTED_CHANNELS: string[] = [
   "Voice of Iman",
   "The Sunnah Sound",
   "Global Quran Channel",
+
+  // XVII. Halal Finance & Wealth Building (401–425)
+  "Islamic Finance Guru",
+  "Practical Islamic Finance",
+  "IslamicFinance360",
+  "Abdullah Nouh",
+  "RizqWise",
+  "Wahed Invest Official",
+  "Halal Stock News",
+  "Manzil",
+  "Islamic Finance News",
+  "Zoya Finance",
+
+  // XVIII. Elite Quran Recitation & Tranquility (426–450)
+  "Mishary Rashid Alafasy",
+  "Sheikh Shuraim Official",
+  "Sudais Official",
+  "Lofi Holy Quran Studio",
+  "Habibullah TV Studio",
+  "Verses of Hope",
+  "Islam Sobhi Official",
+  "Raad Al Kurdi",
+  "Omar Hisham Al Arabi",
+  "Quraan-E-Pak",
+
+  // XIX. High-Level Podcasts & Intellectual Shows (451–475)
+  "The Thinking Muslim",
+  "Wise The Dome Show",
+  "Women of Quran Podcast",
+  "Qalam Institute",
+  "The Muslim Footprint",
+  "Point of View Podcast",
+  "The Halal Life Podcast",
+  "IlmFeed",
+  "Unscripted Islam21c",
+  "The Deen Project Podcast",
+
+  // XX. Advanced Learning & Scholarly Archives (476–500)
+  "Ajmal Raza Qadri",
+  "Roots Community",
+  "LUMINOUS",
+  "Arabic with Husna",
+  "Islamic History Podcast",
+  "SeekersGuidance Global",
+  "Al Madrasatu Al Umariyyah",
+  "Islamic Guidance",
+  "The Islamic Journey",
+  "Noor e Aman",
+
+  // XXI. Global Channels
+  "New Islamic World",
+  "IslamSays",
+  "One Islam Productions",
+  "Qari Fatih Seferagic",
+  "Knowledge Pills",
+  "The Clear Message Foundation",
+  "Halal Parenting Hub",
 ];
 
 export function isTrustedChannel(channelTitle: string): boolean {

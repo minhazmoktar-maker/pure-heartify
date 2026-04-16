@@ -91,6 +91,24 @@ const TRUSTED_CHANNELS_LOWER = [
   "quran in english", "the qari hub", "islamic ambient", "dhikr & dua",
   "heart of quran", "quran for healing", "daily dhikr", "pure quran recitation",
   "voice of iman", "the sunnah sound", "global quran channel",
+  // XVII. Halal Finance & Wealth Building
+  "islamicfinance360", "abdullah nouh", "rizqwise", "wahed invest official",
+  "halal stock news", "manzil", "islamic finance news", "zoya finance",
+  // XVIII. Elite Quran Recitation
+  "mishary rashid alafasy", "sheikh shuraim official", "sudais official",
+  "lofi holy quran studio", "habibullah tv studio", "verses of hope",
+  "islam sobhi official", "raad al kurdi", "quraan-e-pak",
+  // XIX. Podcasts & Intellectual Shows
+  "wise the dome show", "women of quran podcast", "qalam institute",
+  "the muslim footprint", "point of view podcast", "the halal life podcast",
+  "ilmfeed", "unscripted islam21c", "the deen project podcast",
+  // XX. Advanced Learning & Scholarly Archives
+  "ajmal raza qadri", "roots community", "luminous", "arabic with husna",
+  "islamic history podcast", "seekersguidance global", "the islamic journey",
+  "noor e aman",
+  // XXI. Global Channels
+  "new islamic world", "islamsays", "qari fatih seferagic",
+  "knowledge pills", "the clear message foundation", "halal parenting hub",
 ];
 
 function isTrusted(channel: string): boolean {
