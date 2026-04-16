@@ -184,6 +184,10 @@ const SECTION_QUERIES: Record<string, string[]> = {
   "recitation-tranquility": ["Quran recitation sleep peaceful", "beautiful adhan call prayer", "ruqyah healing Quran", "morning evening dhikr dua", "Pure Quran Recitation"],
   "community-podcasts": ["Muslim podcast lifestyle", "Productive Muslim tips", "Muslim wellness mental health", "The Muslim Creative"],
   "live-streams": ["Makkah Live stream", "Madinah Live stream", "Masjid Al-Aqsa live"],
+  "halal-finance": ["halal investing 2026", "Islamic Finance Guru stocks", "Practical Islamic Finance portfolio", "Shariah compliant investing", "RizqWise financial literacy", "Zoya Finance screening"],
+  "elite-recitation": ["Mishary Rashid Alafasy full surah", "Sheikh Shuraim Quran", "Sudais Quran full", "Islam Sobhi recitation", "Raad Al Kurdi Quran", "Omar Hisham Al Arabi Quran"],
+  "intellectual-podcasts": ["The Thinking Muslim interview 2026", "Qalam Institute podcast", "Women of Quran podcast", "IlmFeed podcast", "Unscripted Islam21c", "The Deen Project podcast"],
+  "advanced-learning": ["Arabic with Husna Quranic Arabic", "SeekersGuidance Global traditional", "Al Madrasatu Al Umariyyah curriculum", "Islamic History Podcast", "LUMINOUS Al Kauthar", "Noor e Aman Prophetic"],
 };
 
 function decodeHtml(html: string): string {
