@@ -167,42 +167,6 @@ const SECTION_QUERIES: Record<string, string[]> = {
   "community-podcasts": ["Muslim podcast lifestyle", "Productive Muslim tips", "Muslim wellness mental health", "The Muslim Creative"],
   "live-streams": ["Makkah Live stream", "Madinah Live stream", "Masjid Al-Aqsa live"],
 };
-  if (islamicKw.some(k => text.includes(k))) score += 40;
-  score += 20;
-  score += isTrusted(channelTitle) ? 25 : 5;
-  score += 20;
-  return Math.min(score, 95);
-}
-
-function classifyCategory(title: string, description: string): string {
-  const t = `${title} ${description}`.toLowerCase();
-  if (/quran|surah|recitation|tilawat|tafsir|tajweed/.test(t)) return "Quran";
-  if (/nasheed|naat|anasheed/.test(t)) return "Nasheeds";
-  if (/khutbah|lecture|reminder|jummah|friday/.test(t)) return "Lectures";
-  if (/business|entrepreneur|startup|marketing|finance|money|invest/.test(t)) return "Business";
-  if (/study|learn|education|school|university|science|math|history/.test(t)) return "Education";
-  if (/motivation|discipline|self.?improvement|productivity|habit|mindset|success/.test(t)) return "Self-Improvement";
-  if (/kids|children|cartoon|family|parenting/.test(t)) return "Kids & Family";
-  return "Islamic";
-}
-
-// Curated section queries (server-side config)
-const SECTION_QUERIES: Record<string, string[]> = {
-  "top-100": ["best Islamic lectures", "Quran recitation beautiful", "Islamic motivation", "Mufti Menk motivation", "Omar Suleiman lecture"],
-  "daily-picks": ["Islamic reminder today", "morning dua adhkar", "Quran verse of the day", "Daily Reminder Islam"],
-  "islamic-knowledge": ["Quran tafsir lecture", "hadith explanation", "seerah Prophet Muhammad", "Yasir Qadhi theology", "Yaqeen Institute"],
-  "quran-recitations": ["Quran recitation peaceful", "surah rahman full", "beautiful Quran tilawat", "Makkah Live Quran"],
-  "study-focus": ["study motivation discipline", "focus productivity tips", "Islamic study tips"],
-  "business-money": ["halal investing finance", "Islamic finance explained", "Muslim entrepreneur", "Islamic Finance Guru"],
-  "nasheeds": ["nasheed no music", "Islamic nasheed", "naat sharif", "Arabic nasheed acapella"],
-  "family-kids": ["Islamic cartoons for kids no music", "learn Quran children", "Omar Hana no music", "Muslim Kids TV"],
-  "podcasts": ["Islamic podcast discussion", "The Thinking Muslim podcast", "The Deen Show interview"],
-  "dawah": ["dawah street preaching", "Islam explained non-Muslim", "Mohammed Hijab debate", "OnePath Network documentary"],
-  "health-fitness": ["Muslim fitness motivation", "halal nutrition diet", "sunnah health tips"],
-  "revert-stories": ["revert to Islam story", "The Deen Show revert", "why I became Muslim"],
-  "halal-lifestyle": ["halal food recipe no music", "Halal Kitchen cooking", "Muslim travel vlog halal"],
-  "live-streams": ["Makkah Live stream", "Madinah Live stream", "Masjid Al-Aqsa live"],
-};
 
 function decodeHtml(html: string): string {
   return html.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
