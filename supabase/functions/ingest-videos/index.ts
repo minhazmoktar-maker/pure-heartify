@@ -62,6 +62,35 @@ const TRUSTED_CHANNELS_LOWER = [
   "dawat-e-islami", "muslim travelers", "islam channel", "quran weekly",
   "holy quran world", "maher zain", "sami yusuf", "khan academy", "ted", "tedx talks",
   "kurzgesagt", "crashcourse", "ali abdaal",
+  // V. Intellectual Discourse & Dawah (101-130)
+  "one message foundation", "rational believer", "sapience institute", "efdawah",
+  "sc dawah", "dawah team", "l.a. dawah", "islamic thought", "deen lovers",
+  "scholarly subtitles", "al madrasatu al umariyyah", "onemessagetv", "always islam",
+  "iera", "dus dawah", "darul arqam studios", "call to monotheism", "prophetic men",
+  "dawah digital", "the truth show", "deen one", "simply islam", "islam beliefs",
+  "the straight path", "clear message", "muslim debates", "faith matters",
+  "spirit of islam", "guidance tv",
+  // VI. Academic & Fiqh (131-160)
+  "al-kauthar institute", "mishkah university", "zamzam academy", "seekersguidance",
+  "roots academy", "islamic online university", "al maghrib institute", "sunnah college",
+  "islamqa", "traditional knowledge", "tawheed university", "sharia program",
+  "quran institute", "madina institute", "islamic academy", "fiqh lessons",
+  "hadith hub", "seerah scholars", "islamic ethics", "the scholar's ink",
+  "deen curriculum", "quranic gems", "sunnah follower", "islamic research foundation",
+  "truth seekers", "the arabic hub", "islamic logic", "faithful living",
+  "community fiqh", "scholarly wisdom",
+  // VII. Lifestyle & Community (161-185)
+  "chai with my bhai", "hencehens", "muslim wellness", "the big picture",
+  "smile 2 jannah extra", "halal wealth", "the modest woman", "muslim parenting",
+  "halal eats", "a muslim life", "productive muslim", "islamic home", "muslim fitness",
+  "the halal investor", "soul food", "islamic audiobooks", "the muslim professional",
+  "halal travel tips", "modest trends", "the muslim creative", "haram vs halal",
+  "muslim identity", "the halal way", "muslim socials", "faith & fitness",
+  // VIII. Recitation & Tranquility (186-200)
+  "muslim recitation", "vocal only nasheeds", "tranquil quran", "beautiful adhan",
+  "quran in english", "the qari hub", "islamic ambient", "dhikr & dua",
+  "heart of quran", "quran for healing", "daily dhikr", "pure quran recitation",
+  "voice of iman", "the sunnah sound", "global quran channel",
 ];
 
 function isTrusted(channel: string): boolean {
@@ -89,7 +118,55 @@ function halalScore(title: string, description: string, channelTitle: string): n
     "education", "learn", "study", "motivation", "discipline",
     "self-improvement", "productivity", "business", "entrepreneur",
     "success", "mindset", "knowledge", "wisdom", "lecture", "reminder",
+    "ruqyah", "adhan", "tajweed", "tilawat", "recitation",
   ];
+  if (islamicKw.some(k => text.includes(k))) score += 40;
+  score += 20;
+  score += isTrusted(channelTitle) ? 25 : 5;
+  score += 20;
+  return Math.min(score, 95);
+}
+
+function classifyCategory(title: string, description: string): string {
+  const t = `${title} ${description}`.toLowerCase();
+  if (/quran|surah|recitation|tilawat|tafsir|tajweed/.test(t)) return "Quran";
+  if (/nasheed|naat|anasheed/.test(t)) return "Nasheeds";
+  if (/adhan|call to prayer/.test(t)) return "Adhan";
+  if (/ruqyah|healing|dhikr|dua/.test(t)) return "Spirituality";
+  if (/dawah|debate|comparative|revert|convert/.test(t)) return "Dawah";
+  if (/fiqh|aqeedah|creed|jurisprudence|fatwa/.test(t)) return "Fiqh";
+  if (/khutbah|lecture|reminder|jummah|friday/.test(t)) return "Lectures";
+  if (/business|entrepreneur|startup|marketing|finance|money|invest/.test(t)) return "Business";
+  if (/study|learn|education|school|university|science|math|history/.test(t)) return "Education";
+  if (/motivation|discipline|self.?improvement|productivity|habit|mindset|success/.test(t)) return "Self-Improvement";
+  if (/kids|children|cartoon|family|parenting/.test(t)) return "Kids & Family";
+  if (/podcast|interview|conversation/.test(t)) return "Podcasts";
+  if (/fitness|health|nutrition|workout/.test(t)) return "Health & Fitness";
+  if (/travel|food|recipe|lifestyle|modest/.test(t)) return "Lifestyle";
+  return "Islamic";
+}
+
+// Curated section queries (server-side config)
+const SECTION_QUERIES: Record<string, string[]> = {
+  "top-100": ["best Islamic lectures", "Quran recitation beautiful", "Islamic motivation", "Mufti Menk motivation", "Omar Suleiman lecture"],
+  "daily-picks": ["Islamic reminder today", "morning dua adhkar", "Quran verse of the day", "Daily Reminder Islam"],
+  "islamic-knowledge": ["Quran tafsir lecture", "hadith explanation", "seerah Prophet Muhammad", "Yasir Qadhi theology", "Yaqeen Institute"],
+  "quran-recitations": ["Quran recitation peaceful", "surah rahman full", "beautiful Quran tilawat", "Makkah Live Quran"],
+  "study-focus": ["study motivation discipline", "focus productivity tips", "Islamic study tips"],
+  "business-money": ["halal investing finance", "Islamic finance explained", "Muslim entrepreneur", "Islamic Finance Guru"],
+  "nasheeds": ["nasheed no music", "Islamic nasheed", "naat sharif", "Arabic nasheed acapella"],
+  "family-kids": ["Islamic cartoons for kids no music", "learn Quran children", "Omar Hana no music", "Muslim Kids TV"],
+  "podcasts": ["Islamic podcast discussion", "The Thinking Muslim podcast", "The Deen Show interview", "Chai With My Bhai"],
+  "dawah": ["dawah street preaching", "Islam explained non-Muslim", "Mohammed Hijab debate", "OnePath Network documentary", "Sapience Institute dawah", "EFDawah debate"],
+  "intellectual": ["Islamic philosophy lecture", "comparative religion Islam", "Sapience Institute", "Rational Believer science", "Islamic intellectual history"],
+  "academic-fiqh": ["Islamic fiqh lesson", "SeekersGuidance class", "Al Maghrib Institute", "ZamZam Academy fiqh", "aqeedah creed Islam", "tajweed Quran lesson"],
+  "health-fitness": ["Muslim fitness motivation", "halal nutrition diet", "sunnah health tips", "Faith & Fitness Muslim"],
+  "revert-stories": ["revert to Islam story", "The Deen Show revert", "why I became Muslim", "The Truth Show revert"],
+  "halal-lifestyle": ["halal food recipe no music", "Halal Kitchen cooking", "Muslim travel vlog halal", "Halal Eats food review"],
+  "recitation-tranquility": ["Quran recitation sleep peaceful", "beautiful adhan call prayer", "ruqyah healing Quran", "morning evening dhikr dua", "Pure Quran Recitation"],
+  "community-podcasts": ["Muslim podcast lifestyle", "Productive Muslim tips", "Muslim wellness mental health", "The Muslim Creative"],
+  "live-streams": ["Makkah Live stream", "Madinah Live stream", "Masjid Al-Aqsa live"],
+};
   if (islamicKw.some(k => text.includes(k))) score += 40;
   score += 20;
   score += isTrusted(channelTitle) ? 25 : 5;
