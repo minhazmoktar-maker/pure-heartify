@@ -16,6 +16,7 @@ import ForgotPassword from "./pages/ForgotPassword.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Privacy from "./pages/Privacy.tsx";
 import Profile from "./pages/Profile.tsx";
+import Channels from "./pages/Channels.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/channels" element={<Channels />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
