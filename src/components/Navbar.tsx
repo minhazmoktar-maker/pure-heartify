@@ -1,4 +1,4 @@
-import { Search, Menu, Bell, User, LogOut, Moon, Sun } from "lucide-react";
+import { Search, Menu, Bell, User, LogOut, Moon, Sun, ShieldCheck } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
@@ -54,6 +54,14 @@ const Navbar = () => {
 
         {/* Right */}
         <div className="flex items-center gap-1">
+          <Link
+            to="/channels"
+            className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary md:flex"
+            title="Browse trusted channels"
+          >
+            <ShieldCheck className="h-4 w-4 text-primary" />
+            Channels
+          </Link>
           <button
             onClick={toggleTheme}
             className="rounded-full p-2 hover:bg-secondary transition-colors"
