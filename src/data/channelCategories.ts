@@ -1,0 +1,168 @@
+/**
+ * Trusted channels organized by category for the discovery page.
+ */
+
+export interface ChannelCategory {
+  id: string;
+  title: string;
+  icon: string;
+  description: string;
+  channels: string[];
+}
+
+export const CHANNEL_CATEGORIES: ChannelCategory[] = [
+  {
+    id: "scholars-dawah",
+    title: "Islamic Scholars & Dawah",
+    icon: "📖",
+    description: "Leading scholars and dawah organizations",
+    channels: [
+      "Mufti Menk", "Yaqeen Institute", "Bayyinah Institute", "Nouman Ali Khan",
+      "MercifulServant", "Assim Al Hakeem", "Yasir Qadhi", "OnePath Network",
+      "Omar Suleiman", "iLovUAllah", "The Deen Show", "Islamic Guidance",
+      "FreeQuranEducation", "The Thinking Muslim", "Muslim Central", "Ink of Scholars",
+      "The Prophets Path", "Towards Eternity", "About Islam", "Islamic Relief",
+      "Muslim Matters", "Kalamullah", "Zaytuna College", "Al Madina Institute",
+      "Simply Seerah", "Daily Reminder", "Message TV", "Islam On Demand",
+      "Dr. Zakir Naik", "Digital Mimbar", "One Islam Productions", "EPIC Masjid",
+    ],
+  },
+  {
+    id: "kids-family",
+    title: "Kids & Family",
+    icon: "👨‍👩‍👧‍👦",
+    description: "Islamic content for children and families",
+    channels: [
+      "Omar & Hana", "One 4 Kids", "Zaky", "Muslim Kids TV", "Noor Kids",
+      "Iqra Cartoon", "Musa & Amina", "Little Believers", "Scribble Deen",
+      "Quran Stories for Kids", "Mini Muslims", "Faith Kids", "Quran Quest",
+      "Arabic with Maha", "Muslim Treehouse", "Habibi Kids", "The Good Tree",
+      "Muslim Homeschool", "Deenies",
+    ],
+  },
+  {
+    id: "intellectual",
+    title: "Intellectual Discourse & Dawah",
+    icon: "💭",
+    description: "Comparative religion, philosophy, and clarifying misconceptions",
+    channels: [
+      "The Thinking Muslim", "One Message Foundation", "Rational Believer",
+      "Sapience Institute", "EFDawah", "SC Dawah", "Dawah Team", "L.A. Dawah",
+      "Islamic Thought", "Deen Lovers", "Scholarly Subtitles",
+      "Al Madrasatu Al Umariyyah", "OneMessageTV", "Always Islam", "Iera",
+      "DUS Dawah", "Darul Arqam Studios", "Call to Monotheism", "Prophetic Men",
+      "Dawah Digital", "The Truth Show", "Deen One", "Simply Islam",
+      "Islam Beliefs", "The Straight Path", "Clear Message", "Muslim Debates",
+      "Faith Matters", "Spirit of Islam", "Guidance TV",
+    ],
+  },
+  {
+    id: "academic-fiqh",
+    title: "Academic & Fiqh Hubs",
+    icon: "🎓",
+    description: "Curriculum-based learning and traditional Islamic sciences",
+    channels: [
+      "Al-Kauthar Institute", "Mishkah University", "ZamZam Academy",
+      "SeekersGuidance", "Roots Academy", "Islamic Online University",
+      "Al Maghrib Institute", "Sunnah College", "IslamQA", "Traditional Knowledge",
+      "Tawheed University", "Sharia Program", "Quran Institute", "Madina Institute",
+      "Islamic Academy", "Fiqh Lessons", "Hadith Hub", "Seerah Scholars",
+      "Islamic Ethics", "Deen Curriculum", "Quranic Gems", "Sunnah Follower",
+      "Islamic Research Foundation", "Truth Seekers", "The Arabic Hub",
+      "Islamic Logic", "Faithful Living", "Community Fiqh", "Scholarly Wisdom",
+    ],
+  },
+  {
+    id: "lifestyle-podcasts",
+    title: "Lifestyle, Podcasts & Community",
+    icon: "🎙️",
+    description: "Casual lifestyle, parenting, wellness, and community shows",
+    channels: [
+      "Chai With My Bhai", "HenceHens", "Muslim Wellness", "The Big Picture",
+      "Smile 2 Jannah Extra", "Halal Wealth", "The Modest Woman",
+      "Muslim Parenting", "Halal Eats", "A Muslim Life", "Productive Muslim",
+      "Islamic Home", "Muslim Fitness", "The Halal Investor", "Soul Food",
+      "Islamic Audiobooks", "The Muslim Professional", "Halal Travel Tips",
+      "Modest Trends", "The Muslim Creative", "Haram vs Halal", "Muslim Identity",
+      "The Halal Way", "Muslim Socials", "Faith & Fitness",
+    ],
+  },
+  {
+    id: "halal-finance",
+    title: "Halal Finance & Wealth",
+    icon: "💰",
+    description: "Riba-free investing and ethical entrepreneurship",
+    channels: [
+      "Islamic Finance Guru", "Practical Islamic Finance", "IslamicFinance360",
+      "Abdullah Nouh", "RizqWise", "Wahed Invest Official", "Halal Stock News",
+      "Manzil", "Islamic Finance News", "Zoya Finance",
+    ],
+  },
+  {
+    id: "elite-recitation",
+    title: "Elite Recitation & Tranquility",
+    icon: "🕌",
+    description: "World-class Quran reciters and peaceful audio",
+    channels: [
+      "Mishary Rashid Alafasy", "Sheikh Shuraim Official", "Sudais Official",
+      "Lofi Holy Quran Studio", "Habibullah TV Studio", "Verses of Hope",
+      "Islam Sobhi Official", "Raad Al Kurdi", "Omar Hisham Al Arabi",
+      "Quraan-E-Pak", "Fatih Seferagic", "Muslim Recitation",
+      "Beautiful Adhan", "Tranquil Quran", "The Qari Hub", "Heart of Quran",
+      "Quran for Healing", "Pure Quran Recitation",
+    ],
+  },
+  {
+    id: "intellectual-podcasts",
+    title: "High-Level Podcasts",
+    icon: "🎧",
+    description: "Long-form discussions on faith, politics, and culture",
+    channels: [
+      "The Thinking Muslim", "Wise The Dome Show", "Women of Quran Podcast",
+      "Qalam Institute", "The Muslim Footprint", "Point of View Podcast",
+      "The Halal Life Podcast", "IlmFeed", "Unscripted Islam21c",
+      "The Deen Project Podcast", "The Mad Mamluks", "Fresh Muslim Guide",
+    ],
+  },
+  {
+    id: "advanced-learning",
+    title: "Advanced Learning & Archives",
+    icon: "📚",
+    description: "Scholarly archives and advanced Islamic sciences",
+    channels: [
+      "Ajmal Raza Qadri", "Roots Community", "LUMINOUS", "Arabic with Husna",
+      "Islamic History Podcast", "SeekersGuidance Global",
+      "Al Madrasatu Al Umariyyah", "Islamic Guidance", "The Islamic Journey",
+      "Noor e Aman", "Cambridge Muslim College", "Sunnah TV",
+      "Islamic Digital Studio", "Way of Success", "The iSLAM TV",
+      "Online Quran Teacher", "Holy Quran World",
+    ],
+  },
+  {
+    id: "global-channels",
+    title: "Global Channels",
+    icon: "🌍",
+    description: "International Islamic news and education",
+    channels: [
+      "New Islamic World", "IslamSays", "One Islam Productions",
+      "Qari Fatih Seferagic", "Knowledge Pills", "The Clear Message Foundation",
+      "Halal Parenting Hub", "Al Jazeera English", "Masjid Al-Aqsa",
+      "Makkah Live", "Madinah Live",
+    ],
+  },
+  {
+    id: "nasheeds",
+    title: "Nasheeds & Vocal Audio",
+    icon: "🎵",
+    description: "Vocal-only nasheeds and spiritual songs",
+    channels: [
+      "Maher Zain", "Sami Yusuf", "Vocal Only Nasheeds", "Voice of Iman",
+      "The Sunnah Sound", "Dhikr & Dua", "Daily Dhikr", "Islamic Ambient",
+    ],
+  },
+];
+
+export const TOTAL_CHANNELS = CHANNEL_CATEGORIES.reduce(
+  (sum, cat) => sum + cat.channels.length,
+  0,
+);
