@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      channels_state: {
+        Row: {
+          category: string | null
+          channel_id: string | null
+          channel_name: string
+          created_at: string
+          id: string
+          last_pulled_at: string | null
+          next_page_token: string | null
+          resolved_at: string | null
+          total_pulled: number
+          updated_at: string
+          uploads_playlist_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          channel_id?: string | null
+          channel_name: string
+          created_at?: string
+          id?: string
+          last_pulled_at?: string | null
+          next_page_token?: string | null
+          resolved_at?: string | null
+          total_pulled?: number
+          updated_at?: string
+          uploads_playlist_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          channel_id?: string | null
+          channel_name?: string
+          created_at?: string
+          id?: string
+          last_pulled_at?: string | null
+          next_page_token?: string | null
+          resolved_at?: string | null
+          total_pulled?: number
+          updated_at?: string
+          uploads_playlist_id?: string | null
+        }
+        Relationships: []
+      }
       curated_videos: {
         Row: {
           category: string
@@ -209,6 +251,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
