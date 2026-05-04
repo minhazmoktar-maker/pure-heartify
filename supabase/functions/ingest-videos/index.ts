@@ -44,20 +44,36 @@ const HARD_REJECT_KEYWORDS = [
   "gameplay", "battle royale gaming", "GTA gameplay",
   "prank gone wrong", "trolling", "celebrity gossip",
   "exposed scandal",
-  // Female-presenting visual content (per moderation rules: no female faces/visuals)
-  "makeup tutorial", "hijab tutorial", "hijab style", "modest fashion haul",
+];
+
+// Female-presenting visual content rules (per moderation policy: no female faces/visuals).
+// Tracked separately so the moderation log can flag the exact reason.
+const FEMALE_VISUAL_KEYWORDS = [
+  "makeup tutorial", "makeup look", "hijab tutorial", "hijab style", "hijab fashion",
+  "modest fashion", "modest outfit", "modest haul",
   "outfit of the day", "ootd", "get ready with me", "grwm", "vlogmas",
-  "my morning routine girl", "girls vlog", "sister vlog", "wife vlog",
-  "beauty haul", "fashion haul", "lookbook",
-  "حب اغنية", "اغنية رقص", "رقص",
+  "morning routine girl", "girls vlog", "sister vlog", "wife vlog", "mom vlog",
+  "beauty haul", "fashion haul", "lookbook", "skincare routine",
+  "my pregnancy", "bridal", "henna design", "mehndi design",
+  "sister speaks", "muslimah vlog", "aunty vlog",
 ];
 
-const SOFT_REJECT_PATTERNS = [
-  /you won't believe/i, /gone wrong/i,
-  /\#fyp/i,
+const SOFT_REJECT_PATTERNS: Array<{ re: RegExp; label: string }> = [
+  { re: /you won't believe/i, label: "clickbait:you-wont-believe" },
+  { re: /gone wrong/i, label: "clickbait:gone-wrong" },
+  { re: /\#fyp/i, label: "tag:#fyp" },
 ];
 
-const BAD_EMOJIS = /[💃🍺🍷🎰💋👙🩱🕺]/;
+// Title regexes that strongly indicate a female on-camera presenter
+const FEMALE_PRESENTER_PATTERNS: Array<{ re: RegExp; label: string }> = [
+  { re: /\bmiss\s+[a-z]+\b/i, label: "presenter:miss-name" },
+  { re: /\b(her|she)\s+(story|journey|reverted|converted)\b/i, label: "presenter:her-story" },
+  { re: /\bmuslimah\s+(vlog|diary|life)\b/i, label: "presenter:muslimah-vlog" },
+  { re: /\bsisters?\s+(vlog|diary|haul|tag)\b/i, label: "presenter:sister-vlog" },
+];
+
+const BAD_EMOJIS_RE = /[💃🍺🍷🎰💋👙🩱🕺💄👯👩‍🦰💅]/;
+const FEMALE_EMOJIS_RE = /[👩💃👯💄💅🤰👧]/;
 
 // Trusted channels — keep in sync with src/data/trustedChannels.ts
 const TRUSTED_CHANNELS: string[] = [
@@ -102,6 +118,134 @@ const TRUSTED_CHANNELS: string[] = [
   "Eman Channel", "Huda TV", "Islam Channel", "Hamza's Den", "Halal Chef",
   "Cooking with Ammar", "Sunnah Style", "Seerah of Prophet Muhammad",
   "Qalam Institute", "The Daily Reminder",
+  // === Global expansion: Pacific, Mediterranean, Turkey, Africa, Asia, Europe, Americas ===
+  // Pacific & Malta & Cyprus
+  "Pacific Dawah Network", "Islamic Society of Fiji", "iERA Oceania", "Islam in the Pacific",
+  "Oceania Quran", "The Message Pacific", "Malta Muslim Community", "Islamic Centre of Malta",
+  "Dawah Malta", "Quran in Maltese", "Nour al-Islam Malta", "New Muslims Malta",
+  "Diyanet Cyprus", "Turkish Cypriot Muftyat", "Larnaca Mosque Official", "Cyprus Quran",
+  "Hidayah Cyprus",
+  // Turkey
+  "Hayalhanem", "Sözler Köşkü", "Diyanet TV", "Çınaraltı", "İhsan Şenocak",
+  "Maksat 114", "Hidayet Mektebi", "Rehber TV",
+  // Algeria / Sudan / Iraq / Afghanistan
+  "Sheikh Shamsuddin", "Al-Bilad", "Al-Anis TV", "Quran Algeria", "Sunna Algeria",
+  "Minhaj al-Nubuwwah", "Al-Jazaeriya Academy",
+  "Zad TV", "Sudan TV", "Tayba TV", "Ansar al-Sunnah Sudan", "Quran Radio Sudan",
+  "Al-Istiqama TV", "Dr. Abdul Hai Youssef",
+  "Holy Shrine of Imam Hussain", "Sayed Ammar Nakshawani", "Al-Anwar TV", "Karbala TV",
+  "Sunni Endowment", "Islamic Heritage", "Turaath", "Iraq Dawah",
+  "Al-Emarah", "Dawat TV", "Eslah TV", "Pushto Bayan", "Quran and Sunnah Afghanistan",
+  "Islamic University Kabul", "Noor TV",
+  // Indonesia / Malaysia / Pakistan / Bangladesh
+  "Yufid.TV", "Islam Populer", "Lampu Islam", "Adi Hidayat", "Ustadz Abdul Somad",
+  "Khalid Basalamah", "Rodja TV", "Rumaysho TV", "Hidayah-Mu",
+  "Youth Club", "Dr. Israr Ahmed", "Tariq Jamil", "Mufti Tariq Masood",
+  "MessageTV", "I.R.C.", "The Right Path",
+  "Mizanur Rahman Azhari", "Alor Poth", "Waz TV", "Islamic Talk",
+  "Sayed Ahmad Kalapi", "Farhan Bin Nur", "Islamic Life",
+  // Egypt / Arab World / Morocco
+  "Ahmad Al-Shugairi", "Mustafa Hosny", "Amr Khaled", "Bridges Foundation",
+  "Way2Allah", "Al-Rahma TV", "الطريق إلى الجنة", "Zikir",
+  "Sheikh Saïd el Kamali", "Yassine El Amri", "Al-Aoula TV", "Quran Morocco",
+  "Dawah Maroc", "Al-Huda Morocco",
+  // Saudi & Gulf
+  "Alafasy", "Zad Group", "Dalil TV", "Quran TV", "Sunnah TV",
+  "Bader Al-Meshari", "Sheikh Saleh Al-Fawzan", "Anta Tastati'",
+  // Uzbekistan / Yemen / Syria
+  "Muslim.uz", "Islom.uz", "Azon TV", "Siyrat.uz", "Isomiddin Nur",
+  "Zikr.uz", "Oliy Ma'had", "Ixlos.org", "Qalb nuri",
+  "Al-Iman TV", "Habib Umar bin Hafiz", "Sheikh Al-Zindani", "Suhail TV",
+  "Yemen Dawah", "Yemeni Quran Reciters",
+  "Al-Hadi TV", "Nour Al-Sham", "Sheikh Muhammad al-Yaqoubi", "Dr. Muhammad Ratib al-Nabulsi",
+  "Dawah Syria", "Sheikh Usama al-Rifa'i", "Zad al-Ma'ad", "Tafsir al-Nabulsi",
+  "Syrian Orphans",
+  // Malaysia & West Africa
+  "Ustaz Azhar Idrus", "TV AlHijrah", "Zayan", "IKIMfm", "Ustaz Wadi Annuar", "Puad Al-Zarkashi",
+  "Sunnah TV Niger", "Radio Islamique Mali", "Dawah Niger", "Mali Quran",
+  "Islam au Niger", "Madrasah Mali", "Tawheed Niger", "Al-Huda Mali",
+  "Asfiyahi Television", "Tanef Tv", "Dahira Moustarchidine", "Touba TV",
+  "Tivaouane Official", "Al-Ameen TV", "Senegal Quran Recitation", "Sunna FM Senegal",
+  "Islamic Youth Senegal", "Fayda TV",
+  // Tunisia / Somalia / Azerbaijan / Tajikistan
+  "Zitouna TV", "Sheikh Bechir Ben Hassen", "Al-Insen TV", "Quran Tunisia",
+  "Tunisian Dawah", "Nour al-Huda Tunisia", "Sunna Tunisia", "Mishkat Tunisia",
+  "Somali Islamic Reminders", "Sheikh Shariif Dhivow", "Al-Huda Somali",
+  "Sheikh Mustafe", "Dawah Somali TV", "Somali Quran Recitations",
+  "Mənəviyyat", "Milli Mənəvi Dəyərlər", "İslam Sesi", "Quran Azərbaycan",
+  "Hacı Şahin", "İrfan TV Azerbaijan", "Mədrəsə AZ", "Dəyərlər TV", "AzeDawah",
+  "Muslim.tj", "Nasimjoni Zikrullo", "Tojikon Islamic", "Dargohi Ilm",
+  "Sheikh Temur", "Quran Tajikistan", "Pandu Nasihat", "Rushdi Islom",
+  "Omuzishi Islom", "Zikrulloh TV",
+  // Burkina / Jordan / UAE / Libya
+  "Sunnah TV Burkina", "Radio Islamique Al-Houda", "Dawah Burkina", "AEEMB Media",
+  "Burkina Quran", "Islam au Faso", "Madrasah Al-Falah", "Tawheed Burkina",
+  "Yaheen Institute", "Sheikh Hamza Mansour", "Amman Message", "Darasheh Islamic",
+  "Dr. Ammar Al-Shukry", "Jordanian Quran Reciters", "Nidal Al-Qasem",
+  "Al-Huda Jordan", "Sabeel Jordan",
+  "Awqaf UAE", "Daily Recitation TV HD", "Safas Islamic", "Sheikh Omar Abdelkafi",
+  "Zayed House for Islamic Culture", "Al-Manar Centre", "Islamic Affairs Dubai",
+  "Libya TV Quran", "Dawah Libya", "Nour al-Islam Libya", "Libyan Islamic Heritage",
+  "Sunnah Libya", "Al-Istiqama Libya", "Tafsir Libya",
+  // Central Asia / Djibouti / Comoros / Gambia / Guinea / Palestine / Maldives / Kosovo
+  "Muftyatkz", "Azan.kz", "Asyl Arna", "Kuanysh Tapaev", "Halal Shariat",
+  "Sabyrzhan Esimbay", "Islam Dini", "Quran Kazakhstan", "Yiman Nury", "Kazakhstan Islamic Center",
+  "Nasaat Media", "Yiman", "Islam.kg", "Muftiyat.kg", "Chubak Aji",
+  "Turkmen Islam", "Diyanet Turkmenistan", "Turkmen Quran", "Hikmet Media", "Ahl-i-Sunna Turkmenistan",
+  "Dawah Djibouti", "Al-Huda Djibouti", "Djibouti Quran", "Muftiyat Djibouti", "Madrasah Djibouti",
+  "Comoros Islamic Media", "Al-Fajr Comoros", "Nour al-Islam", "Sheikh Ahmed Abdallah", "Comoros Sunna",
+  "Gambia Islamic Reminders", "Dawah Gambia", "Islamic Call Gambia",
+  "Audio Islamique", "FEWDAARE FOUTA TV", "Guinea Quran", "Dawah Guinea Conakry", "Sunna Guinea",
+  "Al-Aqsa TV", "Palestine Quran", "The Jerusalem Fund", "Dawah Palestine",
+  "Sheikh Yousef Abu Snina", "Palestine Islamic Media", "Ahl-ul-Quds", "Zad al-Aqsa", "Sunna Palestine",
+  "Ministry of Islamic Affairs", "Al Asr", "Naseyhai", "Ali Rameez", "Maldives Quran",
+  "Islam.mv", "Sheikh Sameer", "Addu Dawah", "Hidayah Maldives", "Maldives Zikir",
+  "Bashkësia Islame e Kosovës", "Hoxhë Ahmed Kalaja", "Radio Kontakt", "Paqja TV",
+  "Hoxhë Enis Rama", "Albanian Quran", "Drita e Besimit", "Sira Albania", "Islamic Youth Kosovo",
+  // Europe (Western)
+  "Rappel à l'Islam", "Islam de France", "Ahl al-Bayt France", "Nour d'Islam",
+  "Botschaft des Islam", "Marcel Krass", "Islam Tutorial", "Fokus Islam", "Abul Baraa",
+  "Islam en Español", "Mezquita de Granada", "Islam para Todos",
+  "Musulmani d'Italia", "Sesto San Giovanni Masjid", "Islam Italia TV",
+  "Comunidade Islâmica de Lisboa", "Islam em Português", "A Luz do Islam",
+  "Al-Yaqeen", "Dawah Groep", "Islam Color", "Iqra TV", "Dar al-Ilm",
+  "Moskee el Fath", "Broeder Bilal", "De Weg naar het Paradijs", "Belgian Dawah Network",
+  "Islamische Zentralrat", "Masjid al-Falah", "Islam in Österreich", "Iman Austria",
+  "Dr. Tareq al-Suwaidan", "Dawah Switzerland", "Islamische Glaubensgemeinschaft",
+  "Hikma TV", "Al-Huda Swiss", "Swiss Muslim Lifestyle",
+  "Islam.se", "Islam Net", "Dansk Islamisk Center", "Suomen Islamilainen Yhdyskunta",
+  "Halal i Sverige", "Norway Quran", "Muslimska Förbundet", "Islam Guide", "The Message", "Nordic Halal",
+  // Russia & Caucasus & Asia
+  "Islam.ru", "Shamil Alyautdinov", "Alif TV", "Dagestan Islamic", "Chechnya Today",
+  "Huda Media", "Muslim TV Russia", "Quran Voice Russia", "Academy of Knowledge",
+  "Japan Muslim Peace Federation", "Tokyo Camii", "Chiba Islamic Cultural Center",
+  "Islam in Japanese", "Halal Media Japan", "Japanese Muslimah",
+  "Arabic and Islam Japan", "Mosque Finder Japan", "Shukran Japan",
+  "Chinese Muslim", "Islam in China", "Green Apple Islamic Media", "Learn Arabic",
+  "CCTV-9 Documentary", "Al-Huda China", "Hui Soul", "Islamic Wisdom", "Masjid al-Noor", "The Great Wall Dawah",
+  // India & Latin America
+  "iRC TV", "Peace TV", "Islamic Research Foundation", "Dawat-e-Islami India",
+  "Mufti Menk India Fans", "Ahlulbayt TV", "The Straight Path", "Quran in Hindi",
+  "Mesquita Brasil", "Islam na Prática", "Sheikh Rodrigo Rodrigues",
+  "Mezquita Al-Ahmad", "Centro Islámico de Chile", "Dawah Latin America",
+  "Cultura Islâmica", "Musulmanes en Chile",
+  "ICNA Canada",
+  // Additional global picks
+  "Al Hidaayah", "Belal Assaad", "Safina Society", "Utica Masjid", "Roots", "SonofAMamaJama",
+  "Talk Islam", "One Islam TV", "Muslim Mastery", "Faithful Finance", "Ummahpreneur",
+  "Salam Charity Media", "Islamic Relief Worldwide", "Qatar Charity", "Muslim Hands",
+  "Zakat Foundation", "Human Appeal", "Darul Ifta Deoband", "Al Huda International",
+  "Al Huda TV", "Al Ansar TV", "Madani Channel",
+  "New Muslim Academy", "Convert Central", "Islamic Education Hub", "Quran Learning Center",
+  "Arabic 101 for Muslims", "Muslim Scholars TV", "Deen Academy", "Barakah TV",
+  "Halal Life Academy", "Muslim Wisdom", "Sunnah Studies", "Seerah Academy",
+  "Tafsir Today", "Quran Journey", "The Muslim Classroom", "Fiqh Explained",
+  "Muslim Family TV", "Islamic Parenting Hub", "Muslim Youth Network", "Deen and Dunya",
+  "Muslim Motivation", "Barakah Mindset", "Halal Success", "Muslim Productivity",
+  "Quran and Sunnah Academy", "Islamic Character", "Muslim Life Lessons", "Halal Habits",
+  "Deen Tips", "Islamic Reflection", "Muslim Path", "Faith Steps", "Muslim Growth",
+  "Deen First", "Halal Inspiration", "Muslim Goals", "Islam for Life", "Quran Light",
+  "Sunnah Way", "Faith Forward", "Muslim Beacon", "Deen Guide", "Barakah Path", "The Clear Path",
 ];
 
 function isTrusted(channel: string): boolean {
@@ -109,15 +253,42 @@ function isTrusted(channel: string): boolean {
   return TRUSTED_CHANNELS.some(c => lower.includes(c.toLowerCase()));
 }
 
-function halalScore(title: string, description: string, channelTitle: string, trusted: boolean): number {
+interface Verdict {
+  ok: boolean;
+  score: number;
+  reason?: string;   // category: keyword | female_visual | soft_pattern | emoji | low_score
+  rule?: string;     // exact matched token
+}
+
+function evaluateText(title: string, description: string, channelTitle: string, trusted: boolean): Verdict {
   const text = `${title} ${description} ${channelTitle}`.toLowerCase();
+
   for (const kw of HARD_REJECT_KEYWORDS) {
-    if (text.includes(kw.toLowerCase())) return 0;
+    if (text.includes(kw.toLowerCase())) {
+      return { ok: false, score: 0, reason: "keyword", rule: kw };
+    }
+  }
+  for (const kw of FEMALE_VISUAL_KEYWORDS) {
+    if (text.includes(kw.toLowerCase())) {
+      return { ok: false, score: 0, reason: "female_visual", rule: kw };
+    }
   }
   for (const pat of SOFT_REJECT_PATTERNS) {
-    if (pat.test(text)) return 0;
+    if (pat.re.test(text)) {
+      return { ok: false, score: 0, reason: "soft_pattern", rule: pat.label };
+    }
   }
-  if (BAD_EMOJIS.test(text)) return 0;
+  for (const pat of FEMALE_PRESENTER_PATTERNS) {
+    if (pat.re.test(text)) {
+      return { ok: false, score: 0, reason: "female_presenter", rule: pat.label };
+    }
+  }
+  if (BAD_EMOJIS_RE.test(text)) {
+    return { ok: false, score: 0, reason: "emoji", rule: "bad_emoji" };
+  }
+  if (FEMALE_EMOJIS_RE.test(text)) {
+    return { ok: false, score: 0, reason: "female_visual", rule: "female_emoji" };
+  }
 
   let score = 0;
   const islamicKw = [
@@ -134,7 +305,43 @@ function halalScore(title: string, description: string, channelTitle: string, tr
   score += 20;
   score += trusted ? 25 : 5;
   score += 20;
-  return Math.min(score, 95);
+  return { ok: true, score: Math.min(score, 95) };
+}
+
+// === Optional vision-based thumbnail check (Lovable AI) ===
+// Only used for DISCOVERY items (not for trusted-channel pulls) to keep cost low.
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+const ENABLE_VISION_CHECK = Deno.env.get("ENABLE_VISION_CHECK") !== "false"; // on by default if key present
+
+async function thumbnailIsSafe(thumbnailUrl: string): Promise<{ ok: boolean; rule?: string }> {
+  if (!LOVABLE_API_KEY || !ENABLE_VISION_CHECK || !thumbnailUrl) return { ok: true };
+  try {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-lite",
+        messages: [{
+          role: "user",
+          content: [
+            { type: "text", text: "Reply with one word only: SAFE or REJECT. REJECT if the image shows any female face/body, any woman, dancing, alcohol, gambling, nudity, or musical instruments. Otherwise SAFE." },
+            { type: "image_url", image_url: { url: thumbnailUrl } },
+          ],
+        }],
+        max_tokens: 4,
+      }),
+    });
+    if (!res.ok) return { ok: true }; // fail-open on quota/network
+    const data = await res.json();
+    const verdict = (data?.choices?.[0]?.message?.content ?? "").trim().toUpperCase();
+    if (verdict.startsWith("REJECT")) return { ok: false, rule: "vision:female_or_unsafe_thumbnail" };
+    return { ok: true };
+  } catch {
+    return { ok: true };
+  }
 }
 
 function classifyCategory(title: string, description: string, channelTitle: string): string {
@@ -239,6 +446,25 @@ async function logIngestion(query: string, sectionId: string | null, found: numb
     body: JSON.stringify({ query, section_id: sectionId, videos_found: found, videos_added: added, quota_used: quota }),
   }).catch(() => {});
 }
+
+// Buffer rejections so we batch-insert (cheaper than 50 round-trips)
+const rejectionBuffer: Record<string, unknown>[] = [];
+function queueRejection(row: {
+  video_id: string; title: string; channel_title: string; thumbnail_url?: string;
+  reject_reason: string; matched_rule?: string; halal_score?: number; source: string;
+}) {
+  rejectionBuffer.push(row);
+}
+async function flushRejections() {
+  if (!rejectionBuffer.length) return;
+  const batch = rejectionBuffer.splice(0, rejectionBuffer.length);
+  await sbFetch("moderation_log", {
+    method: "POST",
+    headers: { "Prefer": "return=headers-only" },
+    body: JSON.stringify(batch),
+  }).catch((e) => console.error("moderation_log insert failed", e));
+}
+
 
 // === Channel resolution ===
 async function ensureChannelsSeeded() {
@@ -356,20 +582,37 @@ async function ingestChannel(state: ChannelStateRow): Promise<{ added: number; q
     if (title === "Private video" || title === "Deleted video") continue;
     const desc = snippet?.description ?? "";
     const channel = snippet?.videoOwnerChannelTitle ?? snippet?.channelTitle ?? state.channel_name;
-    const score = halalScore(title, desc, channel, true);
-    if (score < 75) continue; // even trusted channels get keyword-screened
+    const thumb =
+      snippet?.thumbnails?.high?.url ??
+      snippet?.thumbnails?.medium?.url ??
+      snippet?.thumbnails?.default?.url ?? "";
+
+    const verdict = evaluateText(title, desc, channel, true);
+    if (!verdict.ok) {
+      queueRejection({
+        video_id: videoId, title, channel_title: channel, thumbnail_url: thumb,
+        reject_reason: verdict.reason!, matched_rule: verdict.rule, halal_score: 0,
+        source: `channel:${state.channel_name}`,
+      });
+      continue;
+    }
+    if (verdict.score < 75) {
+      queueRejection({
+        video_id: videoId, title, channel_title: channel, thumbnail_url: thumb,
+        reject_reason: "low_score", matched_rule: `score=${verdict.score}<75`, halal_score: verdict.score,
+        source: `channel:${state.channel_name}`,
+      });
+      continue;
+    }
 
     rows.push({
       video_id: videoId,
       title,
       channel_title: channel,
-      thumbnail_url:
-        snippet?.thumbnails?.high?.url ??
-        snippet?.thumbnails?.medium?.url ??
-        snippet?.thumbnails?.default?.url ?? "",
+      thumbnail_url: thumb,
       published_at: snippet?.publishedAt ?? null,
       category: classifyCategory(title, desc, channel),
-      halal_score: score,
+      halal_score: verdict.score,
       section_id: inferSectionFromChannel(channel),
       is_trusted_channel: true,
     });
@@ -412,18 +655,48 @@ async function ingestDiscoveryQuery(sectionId: string, query: string): Promise<{
     const desc = snippet?.description ?? "";
     const channel = snippet?.channelTitle ?? "";
     const trusted = isTrusted(channel);
-    const score = halalScore(title, desc, channel, trusted);
-    // Strict for discovery: 80+ unless trusted
-    if (score < (trusted ? 75 : 80)) continue;
+    const thumb = snippet?.thumbnails?.high?.url ?? snippet?.thumbnails?.medium?.url ?? "";
+
+    const verdict = evaluateText(title, desc, channel, trusted);
+    if (!verdict.ok) {
+      queueRejection({
+        video_id: videoId, title, channel_title: channel, thumbnail_url: thumb,
+        reject_reason: verdict.reason!, matched_rule: verdict.rule, halal_score: 0,
+        source: `discovery:${query}`,
+      });
+      continue;
+    }
+    const minScore = trusted ? 75 : 80;
+    if (verdict.score < minScore) {
+      queueRejection({
+        video_id: videoId, title, channel_title: channel, thumbnail_url: thumb,
+        reject_reason: "low_score", matched_rule: `score=${verdict.score}<${minScore}`,
+        halal_score: verdict.score, source: `discovery:${query}`,
+      });
+      continue;
+    }
+
+    // Vision check: only for untrusted discovery items (where female-presenting risk is highest)
+    if (!trusted) {
+      const visionVerdict = await thumbnailIsSafe(thumb);
+      if (!visionVerdict.ok) {
+        queueRejection({
+          video_id: videoId, title, channel_title: channel, thumbnail_url: thumb,
+          reject_reason: "thumbnail_unsafe", matched_rule: visionVerdict.rule,
+          halal_score: verdict.score, source: `discovery:${query}`,
+        });
+        continue;
+      }
+    }
 
     rows.push({
       video_id: videoId,
       title,
       channel_title: channel,
-      thumbnail_url: snippet?.thumbnails?.high?.url ?? snippet?.thumbnails?.medium?.url ?? "",
+      thumbnail_url: thumb,
       published_at: snippet?.publishedAt ?? null,
       category: classifyCategory(title, desc, channel),
-      halal_score: score,
+      halal_score: verdict.score,
       section_id: sectionId,
       is_trusted_channel: trusted,
     });
@@ -482,12 +755,16 @@ Deno.serve(async (req) => {
       }
     }
 
+    const rejectedCount = rejectionBuffer.length;
+    await flushRejections();
+
     return json({
       success: true,
       mode,
       totalAdded,
       totalQuota,
-      message: `Ingested ${totalAdded} new videos (~${totalQuota} quota units used).`,
+      rejectedCount,
+      message: `Ingested ${totalAdded} new videos (~${totalQuota} quota units used). Rejected ${rejectedCount} this run.`,
     });
   } catch (error) {
     console.error("Ingestion error:", error);
