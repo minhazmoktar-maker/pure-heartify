@@ -125,15 +125,42 @@ function isTrusted(channel: string): boolean {
   return TRUSTED_CHANNELS.some(c => lower.includes(c.toLowerCase()));
 }
 
-function halalScore(title: string, description: string, channelTitle: string, trusted: boolean): number {
+interface Verdict {
+  ok: boolean;
+  score: number;
+  reason?: string;   // category: keyword | female_visual | soft_pattern | emoji | low_score
+  rule?: string;     // exact matched token
+}
+
+function evaluateText(title: string, description: string, channelTitle: string, trusted: boolean): Verdict {
   const text = `${title} ${description} ${channelTitle}`.toLowerCase();
+
   for (const kw of HARD_REJECT_KEYWORDS) {
-    if (text.includes(kw.toLowerCase())) return 0;
+    if (text.includes(kw.toLowerCase())) {
+      return { ok: false, score: 0, reason: "keyword", rule: kw };
+    }
+  }
+  for (const kw of FEMALE_VISUAL_KEYWORDS) {
+    if (text.includes(kw.toLowerCase())) {
+      return { ok: false, score: 0, reason: "female_visual", rule: kw };
+    }
   }
   for (const pat of SOFT_REJECT_PATTERNS) {
-    if (pat.test(text)) return 0;
+    if (pat.re.test(text)) {
+      return { ok: false, score: 0, reason: "soft_pattern", rule: pat.label };
+    }
   }
-  if (BAD_EMOJIS.test(text)) return 0;
+  for (const pat of FEMALE_PRESENTER_PATTERNS) {
+    if (pat.re.test(text)) {
+      return { ok: false, score: 0, reason: "female_presenter", rule: pat.label };
+    }
+  }
+  if (BAD_EMOJIS_RE.test(text)) {
+    return { ok: false, score: 0, reason: "emoji", rule: "bad_emoji" };
+  }
+  if (FEMALE_EMOJIS_RE.test(text)) {
+    return { ok: false, score: 0, reason: "female_visual", rule: "female_emoji" };
+  }
 
   let score = 0;
   const islamicKw = [
@@ -150,7 +177,43 @@ function halalScore(title: string, description: string, channelTitle: string, tr
   score += 20;
   score += trusted ? 25 : 5;
   score += 20;
-  return Math.min(score, 95);
+  return { ok: true, score: Math.min(score, 95) };
+}
+
+// === Optional vision-based thumbnail check (Lovable AI) ===
+// Only used for DISCOVERY items (not for trusted-channel pulls) to keep cost low.
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+const ENABLE_VISION_CHECK = Deno.env.get("ENABLE_VISION_CHECK") !== "false"; // on by default if key present
+
+async function thumbnailIsSafe(thumbnailUrl: string): Promise<{ ok: boolean; rule?: string }> {
+  if (!LOVABLE_API_KEY || !ENABLE_VISION_CHECK || !thumbnailUrl) return { ok: true };
+  try {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-lite",
+        messages: [{
+          role: "user",
+          content: [
+            { type: "text", text: "Reply with one word only: SAFE or REJECT. REJECT if the image shows any female face/body, any woman, dancing, alcohol, gambling, nudity, or musical instruments. Otherwise SAFE." },
+            { type: "image_url", image_url: { url: thumbnailUrl } },
+          ],
+        }],
+        max_tokens: 4,
+      }),
+    });
+    if (!res.ok) return { ok: true }; // fail-open on quota/network
+    const data = await res.json();
+    const verdict = (data?.choices?.[0]?.message?.content ?? "").trim().toUpperCase();
+    if (verdict.startsWith("REJECT")) return { ok: false, rule: "vision:female_or_unsafe_thumbnail" };
+    return { ok: true };
+  } catch {
+    return { ok: true };
+  }
 }
 
 function classifyCategory(title: string, description: string, channelTitle: string): string {
