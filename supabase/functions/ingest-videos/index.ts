@@ -44,6 +44,11 @@ const HARD_REJECT_KEYWORDS = [
   "gameplay", "battle royale gaming", "GTA gameplay",
   "prank gone wrong", "trolling", "celebrity gossip",
   "exposed scandal",
+  // Female-presenting visual content (per moderation rules: no female faces/visuals)
+  "makeup tutorial", "hijab tutorial", "hijab style", "modest fashion haul",
+  "outfit of the day", "ootd", "get ready with me", "grwm", "vlogmas",
+  "my morning routine girl", "girls vlog", "sister vlog", "wife vlog",
+  "beauty haul", "fashion haul", "lookbook",
   "حب اغنية", "اغنية رقص", "رقص",
 ];
 
@@ -86,8 +91,17 @@ const TRUSTED_CHANNELS: string[] = [
   "Omar & Hana", "One 4 Kids", "Muslim Kids TV", "Noor Kids", "Iqra Cartoon",
   // Live streams
   "Makkah Live", "Madinah Live",
+  // Live streams
+  "Makkah Live", "Madinah Live",
   // Nasheeds (vocal-only emphasized)
-  "Maher Zain", "Sami Yusuf",
+  "Maher Zain", "Sami Yusuf", "Zain Bhikha", "Siedd", "Deen Squad", "Mishary Alafasy Nasheed",
+  // Additional curated (recitation, podcasts, docs, dawah, lifestyle, nasheeds)
+  "Quran Revolution TV", "Yasser Al-Dosari", "Maher Al-Muaiqly", "Abdul Rahman Al-Sudais",
+  "IlmFeed Podcast", "IlmFeed", "Mind Heist Podcast", "Digital Sisterhood Podcast",
+  "Freshly Grounded", "Ali Hammuda", "Al Jazeera Documentary", "TRT World",
+  "Eman Channel", "Huda TV", "Islam Channel", "Hamza's Den", "Halal Chef",
+  "Cooking with Ammar", "Sunnah Style", "Seerah of Prophet Muhammad",
+  "Qalam Institute", "The Daily Reminder",
 ];
 
 function isTrusted(channel: string): boolean {

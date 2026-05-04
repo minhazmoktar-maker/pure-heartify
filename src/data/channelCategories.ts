@@ -158,6 +158,69 @@ export const CHANNEL_CATEGORIES: ChannelCategory[] = [
     channels: [
       "Maher Zain", "Sami Yusuf", "Vocal Only Nasheeds", "Voice of Iman",
       "The Sunnah Sound", "Dhikr & Dua", "Daily Dhikr", "Islamic Ambient",
+      "Mishary Alafasy Nasheed", "Zain Bhikha", "Deen Squad", "Siedd",
+    ],
+  },
+  {
+    id: "elite-recitation-extra",
+    title: "Quran Recitation (Elite)",
+    icon: "📿",
+    description: "World-renowned Qaris and recitation channels",
+    channels: [
+      "Quran Revolution TV", "Mishary Rashid Alafasy", "Abdul Rahman Al-Sudais",
+      "Yasser Al-Dosari", "Maher Al-Muaiqly", "Omar Hisham Al Arabi",
+      "Islam Sobhi Official", "Raad Al Kurdi", "Sheikh Shuraim Official",
+    ],
+  },
+  {
+    id: "halal-podcasts",
+    title: "Halal Podcasts (Voice-focused)",
+    icon: "🎙️",
+    description: "Audio-first podcasts and intellectual conversations",
+    channels: [
+      "The Thinking Muslim", "Freshly Grounded", "IlmFeed Podcast",
+      "Mind Heist Podcast", "Digital Sisterhood Podcast", "Chai With My Bhai",
+      "Qalam Institute",
+    ],
+  },
+  {
+    id: "halal-documentaries",
+    title: "Halal Documentaries & Stories",
+    icon: "🎬",
+    description: "Documentary channels with Islamic and current-affairs focus",
+    channels: [
+      "Islam Channel", "Al Jazeera Documentary", "TRT World", "Eman Channel",
+      "Huda TV",
+    ],
+  },
+  {
+    id: "dawah-debates",
+    title: "Dawah & Debates",
+    icon: "🕌",
+    description: "Educational dawah and respectful debate platforms",
+    channels: [
+      "iERA", "Sapience Institute", "EFDawah", "Hamza's Den",
+      "One Message Foundation",
+    ],
+  },
+  {
+    id: "halal-lifestyle-family",
+    title: "Family & Halal Lifestyle",
+    icon: "👨‍👩‍👧",
+    description: "Halal cooking, modest lifestyle, and family content",
+    channels: [
+      "The Muslim Vibe", "Smile2Jannah", "Halal Chef", "Cooking with Ammar",
+      "Sunnah Style",
+    ],
+  },
+  {
+    id: "hadith-seerah",
+    title: "Hadith & Seerah",
+    icon: "📜",
+    description: "Hadith studies and Seerah of the Prophet ﷺ",
+    channels: [
+      "Seerah of Prophet Muhammad", "Yasir Qadhi", "Islamic Guidance",
+      "The Daily Reminder", "Qalam Institute",
     ],
   },
 ];
