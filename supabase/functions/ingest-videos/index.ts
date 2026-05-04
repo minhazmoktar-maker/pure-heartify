@@ -627,12 +627,16 @@ Deno.serve(async (req) => {
       }
     }
 
+    const rejectedCount = rejectionBuffer.length;
+    await flushRejections();
+
     return json({
       success: true,
       mode,
       totalAdded,
       totalQuota,
-      message: `Ingested ${totalAdded} new videos (~${totalQuota} quota units used).`,
+      rejectedCount,
+      message: `Ingested ${totalAdded} new videos (~${totalQuota} quota units used). Rejected ${rejectedCount} this run.`,
     });
   } catch (error) {
     console.error("Ingestion error:", error);
