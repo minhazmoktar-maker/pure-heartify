@@ -44,20 +44,36 @@ const HARD_REJECT_KEYWORDS = [
   "gameplay", "battle royale gaming", "GTA gameplay",
   "prank gone wrong", "trolling", "celebrity gossip",
   "exposed scandal",
-  // Female-presenting visual content (per moderation rules: no female faces/visuals)
-  "makeup tutorial", "hijab tutorial", "hijab style", "modest fashion haul",
+];
+
+// Female-presenting visual content rules (per moderation policy: no female faces/visuals).
+// Tracked separately so the moderation log can flag the exact reason.
+const FEMALE_VISUAL_KEYWORDS = [
+  "makeup tutorial", "makeup look", "hijab tutorial", "hijab style", "hijab fashion",
+  "modest fashion", "modest outfit", "modest haul",
   "outfit of the day", "ootd", "get ready with me", "grwm", "vlogmas",
-  "my morning routine girl", "girls vlog", "sister vlog", "wife vlog",
-  "beauty haul", "fashion haul", "lookbook",
-  "حب اغنية", "اغنية رقص", "رقص",
+  "morning routine girl", "girls vlog", "sister vlog", "wife vlog", "mom vlog",
+  "beauty haul", "fashion haul", "lookbook", "skincare routine",
+  "my pregnancy", "bridal", "henna design", "mehndi design",
+  "sister speaks", "muslimah vlog", "aunty vlog",
 ];
 
-const SOFT_REJECT_PATTERNS = [
-  /you won't believe/i, /gone wrong/i,
-  /\#fyp/i,
+const SOFT_REJECT_PATTERNS: Array<{ re: RegExp; label: string }> = [
+  { re: /you won't believe/i, label: "clickbait:you-wont-believe" },
+  { re: /gone wrong/i, label: "clickbait:gone-wrong" },
+  { re: /\#fyp/i, label: "tag:#fyp" },
 ];
 
-const BAD_EMOJIS = /[💃🍺🍷🎰💋👙🩱🕺]/;
+// Title regexes that strongly indicate a female on-camera presenter
+const FEMALE_PRESENTER_PATTERNS: Array<{ re: RegExp; label: string }> = [
+  { re: /\bmiss\s+[a-z]+\b/i, label: "presenter:miss-name" },
+  { re: /\b(her|she)\s+(story|journey|reverted|converted)\b/i, label: "presenter:her-story" },
+  { re: /\bmuslimah\s+(vlog|diary|life)\b/i, label: "presenter:muslimah-vlog" },
+  { re: /\bsisters?\s+(vlog|diary|haul|tag)\b/i, label: "presenter:sister-vlog" },
+];
+
+const BAD_EMOJIS_RE = /[💃🍺🍷🎰💋👙🩱🕺💄👯👩‍🦰💅]/;
+const FEMALE_EMOJIS_RE = /[👩💃👯💄💅🤰👧]/;
 
 // Trusted channels — keep in sync with src/data/trustedChannels.ts
 const TRUSTED_CHANNELS: string[] = [
