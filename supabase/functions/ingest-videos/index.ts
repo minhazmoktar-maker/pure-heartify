@@ -454,20 +454,37 @@ async function ingestChannel(state: ChannelStateRow): Promise<{ added: number; q
     if (title === "Private video" || title === "Deleted video") continue;
     const desc = snippet?.description ?? "";
     const channel = snippet?.videoOwnerChannelTitle ?? snippet?.channelTitle ?? state.channel_name;
-    const score = halalScore(title, desc, channel, true);
-    if (score < 75) continue; // even trusted channels get keyword-screened
+    const thumb =
+      snippet?.thumbnails?.high?.url ??
+      snippet?.thumbnails?.medium?.url ??
+      snippet?.thumbnails?.default?.url ?? "";
+
+    const verdict = evaluateText(title, desc, channel, true);
+    if (!verdict.ok) {
+      queueRejection({
+        video_id: videoId, title, channel_title: channel, thumbnail_url: thumb,
+        reject_reason: verdict.reason!, matched_rule: verdict.rule, halal_score: 0,
+        source: `channel:${state.channel_name}`,
+      });
+      continue;
+    }
+    if (verdict.score < 75) {
+      queueRejection({
+        video_id: videoId, title, channel_title: channel, thumbnail_url: thumb,
+        reject_reason: "low_score", matched_rule: `score=${verdict.score}<75`, halal_score: verdict.score,
+        source: `channel:${state.channel_name}`,
+      });
+      continue;
+    }
 
     rows.push({
       video_id: videoId,
       title,
       channel_title: channel,
-      thumbnail_url:
-        snippet?.thumbnails?.high?.url ??
-        snippet?.thumbnails?.medium?.url ??
-        snippet?.thumbnails?.default?.url ?? "",
+      thumbnail_url: thumb,
       published_at: snippet?.publishedAt ?? null,
       category: classifyCategory(title, desc, channel),
-      halal_score: score,
+      halal_score: verdict.score,
       section_id: inferSectionFromChannel(channel),
       is_trusted_channel: true,
     });
