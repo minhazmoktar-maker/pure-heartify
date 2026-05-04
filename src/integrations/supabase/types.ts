@@ -161,6 +161,45 @@ export type Database = {
         }
         Relationships: []
       }
+      moderation_log: {
+        Row: {
+          channel_title: string
+          created_at: string
+          halal_score: number | null
+          id: string
+          matched_rule: string | null
+          reject_reason: string
+          source: string | null
+          thumbnail_url: string | null
+          title: string
+          video_id: string
+        }
+        Insert: {
+          channel_title: string
+          created_at?: string
+          halal_score?: number | null
+          id?: string
+          matched_rule?: string | null
+          reject_reason: string
+          source?: string | null
+          thumbnail_url?: string | null
+          title: string
+          video_id: string
+        }
+        Update: {
+          channel_title?: string
+          created_at?: string
+          halal_score?: number | null
+          id?: string
+          matched_rule?: string | null
+          reject_reason?: string
+          source?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          video_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
