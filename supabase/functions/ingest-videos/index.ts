@@ -44,6 +44,11 @@ const HARD_REJECT_KEYWORDS = [
   "gameplay", "battle royale gaming", "GTA gameplay",
   "prank gone wrong", "trolling", "celebrity gossip",
   "exposed scandal",
+  // Female-presenting visual content (per moderation rules: no female faces/visuals)
+  "makeup tutorial", "hijab tutorial", "hijab style", "modest fashion haul",
+  "outfit of the day", "ootd", "get ready with me", "grwm", "vlogmas",
+  "my morning routine girl", "girls vlog", "sister vlog", "wife vlog",
+  "beauty haul", "fashion haul", "lookbook",
   "حب اغنية", "اغنية رقص", "رقص",
 ];
 
