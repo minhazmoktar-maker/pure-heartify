@@ -527,18 +527,48 @@ async function ingestDiscoveryQuery(sectionId: string, query: string): Promise<{
     const desc = snippet?.description ?? "";
     const channel = snippet?.channelTitle ?? "";
     const trusted = isTrusted(channel);
-    const score = halalScore(title, desc, channel, trusted);
-    // Strict for discovery: 80+ unless trusted
-    if (score < (trusted ? 75 : 80)) continue;
+    const thumb = snippet?.thumbnails?.high?.url ?? snippet?.thumbnails?.medium?.url ?? "";
+
+    const verdict = evaluateText(title, desc, channel, trusted);
+    if (!verdict.ok) {
+      queueRejection({
+        video_id: videoId, title, channel_title: channel, thumbnail_url: thumb,
+        reject_reason: verdict.reason!, matched_rule: verdict.rule, halal_score: 0,
+        source: `discovery:${query}`,
+      });
+      continue;
+    }
+    const minScore = trusted ? 75 : 80;
+    if (verdict.score < minScore) {
+      queueRejection({
+        video_id: videoId, title, channel_title: channel, thumbnail_url: thumb,
+        reject_reason: "low_score", matched_rule: `score=${verdict.score}<${minScore}`,
+        halal_score: verdict.score, source: `discovery:${query}`,
+      });
+      continue;
+    }
+
+    // Vision check: only for untrusted discovery items (where female-presenting risk is highest)
+    if (!trusted) {
+      const visionVerdict = await thumbnailIsSafe(thumb);
+      if (!visionVerdict.ok) {
+        queueRejection({
+          video_id: videoId, title, channel_title: channel, thumbnail_url: thumb,
+          reject_reason: "thumbnail_unsafe", matched_rule: visionVerdict.rule,
+          halal_score: verdict.score, source: `discovery:${query}`,
+        });
+        continue;
+      }
+    }
 
     rows.push({
       video_id: videoId,
       title,
       channel_title: channel,
-      thumbnail_url: snippet?.thumbnails?.high?.url ?? snippet?.thumbnails?.medium?.url ?? "",
+      thumbnail_url: thumb,
       published_at: snippet?.publishedAt ?? null,
       category: classifyCategory(title, desc, channel),
-      halal_score: score,
+      halal_score: verdict.score,
       section_id: sectionId,
       is_trusted_channel: trusted,
     });
