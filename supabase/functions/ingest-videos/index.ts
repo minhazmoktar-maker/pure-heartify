@@ -319,6 +319,25 @@ async function logIngestion(query: string, sectionId: string | null, found: numb
   }).catch(() => {});
 }
 
+// Buffer rejections so we batch-insert (cheaper than 50 round-trips)
+const rejectionBuffer: Record<string, unknown>[] = [];
+function queueRejection(row: {
+  video_id: string; title: string; channel_title: string; thumbnail_url?: string;
+  reject_reason: string; matched_rule?: string; halal_score?: number; source: string;
+}) {
+  rejectionBuffer.push(row);
+}
+async function flushRejections() {
+  if (!rejectionBuffer.length) return;
+  const batch = rejectionBuffer.splice(0, rejectionBuffer.length);
+  await sbFetch("moderation_log", {
+    method: "POST",
+    headers: { "Prefer": "return=headers-only" },
+    body: JSON.stringify(batch),
+  }).catch((e) => console.error("moderation_log insert failed", e));
+}
+
+
 // === Channel resolution ===
 async function ensureChannelsSeeded() {
   // Insert any missing trusted channels into channels_state
