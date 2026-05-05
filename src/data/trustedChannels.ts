@@ -437,6 +437,28 @@ export const TRUSTED_CHANNELS: string[] = [
   "Al Huda TV", "Al Ansar TV", "Madani Channel", "New Muslim Academy",
   "Quran Learning Center", "Deen Academy", "Barakah TV",
   "Tafsir Today", "Fiqh Explained", "Muslim Family TV", "Islamic Parenting Hub",
+
+  // XXIV. Additional halal channels (recitation, nasheeds, lectures)
+  "Holy Tune", "HolyTune", "Holy Tunes", "Quran Holy Tune",
+  "Quran Tune", "Tranquil Tune", "Soothing Quran", "Heart Soothing Quran",
+  "Peaceful Recitation", "Calm Quran", "Quran Melody", "Sacred Tune",
+  "Holy Quran Channel", "Holy Quran TV", "Holy Quran Recitation",
+  "Quran Central", "Quran Hub", "Quran Daily", "Quran World",
+  "Beautiful Quran Recitation", "Soft Quran", "Relaxing Quran",
+  "Sleep Quran", "Quran for Sleep", "Quran Healing", "Ruqyah Channel",
+  "Salah Channel", "Adhan TV", "The Adhan", "Athan Channel",
+  "Sheikh Abdul Basit", "Sheikh Mahmoud Khalil Al-Hussary", "Mohamed Siddiq El-Minshawi",
+  "Sheikh Mostafa Ismail", "Hani Ar-Rifai", "Saad Al-Ghamdi", "Salah Bukhatir",
+  "Idris Abkar", "Muhammad Al-Luhaidan", "Abdullah Al Juhany", "Khaled Al-Jaleel",
+  "Ahmad Al-Nufais", "Muhammad Taha Al-Junaid", "Hazza Al Balushi",
+  "Nasser Al Qatami", "Tawfeeq As-Sayegh", "Bandar Baleela",
+  "Salman Al-Utaybi", "Yasser Al Mazroyee", "Abdul Wali Al-Arkani",
+  "Halal Tube", "Halal Channel", "Halal Stream", "Halal Vibes",
+  "Pure Islam", "Pure Deen", "Pure Sunnah", "Pure Tawheed",
+  "Iman Boost", "Iman Lift", "Daily Iman", "Iman TV",
+  "Sunnah Way", "Salaf Way", "Salafi Sounds", "Salafi Publications",
+  "Authentic Islam", "True Islam TV", "Real Islam", "Islam Reminder",
+  "Reminders for Hearts", "Soft Reminders", "Heart Reminders", "Daily Dose of Deen",
 ];
 
 export function isTrustedChannel(channelTitle: string): boolean {
