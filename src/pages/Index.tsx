@@ -85,11 +85,14 @@ const Index = () => {
 
       {/* Curated "For You" tab */}
       {mainTab === "curated" && (
-        <main className="mx-auto max-w-[1800px] px-4 py-2 md:px-6">
-          {CURATED_SECTIONS.map((section) => (
-            <CuratedSectionRow key={section.id} section={section} />
-          ))}
-        </main>
+        <FeedDiversityProvider>
+          <main className="mx-auto max-w-[1800px] px-4 py-2 md:px-6">
+            <DiversityToggle />
+            {CURATED_SECTIONS.map((section) => (
+              <CuratedSectionRow key={section.id} section={section} />
+            ))}
+          </main>
+        </FeedDiversityProvider>
       )}
 
       {mainTab === "videos" && (
