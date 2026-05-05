@@ -7,6 +7,7 @@ import { useInfiniteFeed } from "@/hooks/useInfiniteFeed";
 import YouTubeVideoCard from "@/components/YouTubeVideoCard";
 import { isTrustedChannel } from "@/data/trustedChannels";
 import { Badge } from "@/components/ui/badge";
+import { useFeedDiversity } from "@/contexts/FeedDiversityContext";
 
 interface Props {
   section: CuratedSection;
