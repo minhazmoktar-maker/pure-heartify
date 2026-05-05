@@ -18,7 +18,18 @@ const SectionAll = () => {
     ? { ...section, maxResults: 60 }
     : null;
 
-  const { data: videos, isLoading } = useCuratedSection(expandedSection!, !!expandedSection);
+  const { data: rawVideos, isLoading } = useCuratedSection(expandedSection!, !!expandedSection);
+
+  // Cap to max 3 videos per channel for variety
+  const MAX_PER_CHANNEL = 3;
+  const perChannel = new Map<string, number>();
+  const videos = rawVideos?.filter((v) => {
+    const key = (v.channelTitle || "unknown").toLowerCase().trim();
+    const count = perChannel.get(key) ?? 0;
+    if (count >= MAX_PER_CHANNEL) return false;
+    perChannel.set(key, count + 1);
+    return true;
+  });
 
   if (!section) {
     return (
