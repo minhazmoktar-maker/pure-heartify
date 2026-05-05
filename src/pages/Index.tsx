@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Video, Headphones, Loader2, Sparkles } from "lucide-react";
+import { Video, Headphones, Sparkles, Shuffle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import HalalCategoryFilter from "@/components/HalalCategoryFilter";
@@ -9,7 +9,26 @@ import CuratedSectionRow from "@/components/CuratedSectionRow";
 import InfiniteVideoGrid from "@/components/InfiniteVideoGrid";
 import { type HalalCategory } from "@/services/youtube";
 import { CURATED_SECTIONS } from "@/data/curatedSections";
+import { FeedDiversityProvider, useFeedDiversity } from "@/contexts/FeedDiversityContext";
 import { cn } from "@/lib/utils";
+
+const DiversityToggle = () => {
+  const { showMoreChannels, toggleShowMoreChannels } = useFeedDiversity();
+  return (
+    <button
+      onClick={toggleShowMoreChannels}
+      className={cn(
+        "mb-2 mt-2 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+        showMoreChannels
+          ? "border-primary bg-primary/10 text-primary"
+          : "border-border text-muted-foreground hover:text-foreground",
+      )}
+    >
+      <Shuffle className="h-3.5 w-3.5" />
+      {showMoreChannels ? "Showing more channels" : "Show more channels"}
+    </button>
+  );
+};
 
 type MainTab = "videos" | "listen" | "curated";
 
@@ -66,11 +85,14 @@ const Index = () => {
 
       {/* Curated "For You" tab */}
       {mainTab === "curated" && (
-        <main className="mx-auto max-w-[1800px] px-4 py-2 md:px-6">
-          {CURATED_SECTIONS.map((section) => (
-            <CuratedSectionRow key={section.id} section={section} />
-          ))}
-        </main>
+        <FeedDiversityProvider>
+          <main className="mx-auto max-w-[1800px] px-4 py-2 md:px-6">
+            <DiversityToggle />
+            {CURATED_SECTIONS.map((section) => (
+              <CuratedSectionRow key={section.id} section={section} />
+            ))}
+          </main>
+        </FeedDiversityProvider>
       )}
 
       {mainTab === "videos" && (
