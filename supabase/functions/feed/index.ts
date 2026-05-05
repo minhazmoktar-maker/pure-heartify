@@ -41,7 +41,8 @@ Deno.serve(async (req) => {
     const search = typeof body?.search === "string" ? body.search.trim() : "";
 
     // Build PostgREST query
-    let url = `${SUPABASE_URL}/rest/v1/curated_videos?select=*&order=halal_score.desc,ingested_at.desc&limit=${limit}`;
+    // Order: freshest content first (published_at), then halal_score, then ingested_at as tiebreaker.
+    let url = `${SUPABASE_URL}/rest/v1/curated_videos?select=*&order=published_at.desc.nullslast,halal_score.desc,ingested_at.desc&limit=${limit}`;
 
     if (category && category !== "All") {
       url += `&category=eq.${encodeURIComponent(category)}`;
