@@ -36,16 +36,21 @@ const CuratedSectionRow = ({ section }: Props) => {
   );
 
   const rawVideos = dbVideos.length > 0 ? dbVideos : (ytVideos ?? []);
-  // Cap to max 3 videos per channel/creator for variety
-  const MAX_PER_CHANNEL = 3;
+  const { seenVideoIds, perChannelCap, resetKey } = useFeedDiversity();
+
+  // Cross-section dedup + per-channel cap
   const perChannel = new Map<string, number>();
   const videos = rawVideos.filter((v) => {
+    if (seenVideoIds.current.has(v.id)) return false;
     const key = (v.channelTitle || "unknown").toLowerCase().trim();
     const count = perChannel.get(key) ?? 0;
-    if (count >= MAX_PER_CHANNEL) return false;
+    if (count >= perChannelCap) return false;
     perChannel.set(key, count + 1);
+    seenVideoIds.current.add(v.id);
     return true;
   });
+  // resetKey triggers re-eval if user toggles diversity mode
+  void resetKey;
   const isLoading = feedLoading || (useYouTubeFallback && ytLoading);
 
   useEffect(() => {
