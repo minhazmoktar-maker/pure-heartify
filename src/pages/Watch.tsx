@@ -150,7 +150,7 @@ const Watch = () => {
                   <span className="font-medium text-foreground">{currentVideo.channelTitle}</span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
                     <Shield className="h-3 w-3" />
-                    Halal {currentVideo.halalScore}%
+                    {currentVideo.halalScore >= 85 ? ">85% Halal" : `${currentVideo.halalScore}% Halal`}
                   </span>
                   <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{currentVideo.category}</span>
                   <button
