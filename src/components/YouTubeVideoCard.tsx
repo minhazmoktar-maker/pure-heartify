@@ -57,7 +57,7 @@ const YouTubeVideoCard = ({ video, index }: YouTubeVideoCardProps) => {
         />
         <span className="absolute bottom-2 left-2 flex items-center gap-1 rounded-md bg-primary/90 px-1.5 py-0.5 text-xs font-medium text-primary-foreground">
           <Shield className="h-3 w-3" />
-          {video.halalScore}%
+          {video.halalScore >= 85 ? ">85% Halal" : `${video.halalScore}% Halal`}
         </span>
         <span className="absolute right-2 top-2 rounded-md bg-foreground/70 px-1.5 py-0.5 text-xs font-medium text-background">
           {video.category}
