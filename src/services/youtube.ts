@@ -22,7 +22,12 @@ const HARD_REJECT_KEYWORDS = [
   "exposed", "viral clip", "shocking video",
   "pyar", "mohabbat", "ladki", "sharab", "jua", "nach",
   "حب", "اغنية", "رقص",
+  // Blocked creators by name
+  "mia yilin", "mehreen", "leila hormozi", "layla hormozi",
 ];
+
+const FEMALE_SENSITIVE_CHANNELS = ["sami yusuf", "sami yousuf", "why they converted"];
+const FEMALE_MENTION_RE = /\b(woman|women|female|girl|sister|her story|she |actress|songstress|hijabi)\b/i;
 
 const SOFT_REJECT_PATTERNS = [
   /you won't believe/i, /shocking/i, /gone wrong/i,
@@ -37,7 +42,13 @@ const MULTI_QUERY_BUDGET = 3;
 
 export function halalScore(title: string, description: string, channelTitle: string): number {
   const text = `${title} ${description} ${channelTitle}`.toLowerCase();
+  const channelLower = channelTitle.toLowerCase();
 
+  for (const sensitive of FEMALE_SENSITIVE_CHANNELS) {
+    if (channelLower.includes(sensitive) && FEMALE_MENTION_RE.test(`${title} ${description}`)) {
+      return 0;
+    }
+  }
   for (const kw of HARD_REJECT_KEYWORDS) {
     if (text.includes(kw.toLowerCase())) return 0;
   }
@@ -71,7 +82,7 @@ export function halalScore(title: string, description: string, channelTitle: str
 
   score += 20;
 
-  return Math.min(score, 95);
+  return Math.min(score, 85);
 }
 
 export type HalalCategory =
@@ -152,7 +163,7 @@ const FALLBACK_VIDEOS: YouTubeVideo[] = fallbackVideoSeed.map((video, index) => 
   thumbnailUrl: video.thumbnail,
   channelTitle: video.channel,
   category: mapFallbackCategory(video.category),
-  halalScore: video.verified ? 92 : 84,
+  halalScore: video.verified ? 85 : 78,
   publishedAt: new Date(Date.now() - index * 86400000).toISOString(),
 }));
 
