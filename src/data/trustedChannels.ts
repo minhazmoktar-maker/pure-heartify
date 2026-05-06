@@ -459,6 +459,26 @@ export const TRUSTED_CHANNELS: string[] = [
   "Sunnah Way", "Salaf Way", "Salafi Sounds", "Salafi Publications",
   "Authentic Islam", "True Islam TV", "Real Islam", "Islam Reminder",
   "Reminders for Hearts", "Soft Reminders", "Heart Reminders", "Daily Dose of Deen",
+
+  // XXV. Halal education, finance, podcasts (added)
+  "Practical Islamic Finance", "Islamic Finance Guru", "IFG", "Wahed Invest",
+  "Zoya Finance", "Amanah Finance", "Halal Money Matters", "Muslim Money Guide",
+  "Halal Stock Screener", "Halal Investor", "Faithful Finance",
+  "TED-Ed", "Khan Academy", "CrashCourse", "Veritasium", "SmarterEveryDay",
+  "Big Think", "The School of Life", "MIT OpenCourseWare", "Harvard University",
+  "Stanford", "Yale Courses", "National Geographic Education",
+  "Ali Abdaal", "Thomas Frank", "Matt D'Avella",
+  "Mufti Ismail Menk", "Muhammad Hoblos", "Tim Humble", "Abu Bakr Zoud",
+  "Saad Tasleem", "Suleiman Hani", "Hamza Tzortzis", "Sapience Institute",
+  "Blogging Theology", "Paul Williams", "Many Prophets One Message",
+  "Smile 2 Jannah", "Adnan Rashid", "Ali Dawah", "Mohammed Hijab",
+  "Eman Channel", "Dr Haifaa Younis hadith only audio",
+  "The Mad Mamluks", "Mufti Abdur-Rahman ibn Yusuf", "Shaykh Hasan Ali",
+  "Shaykh Yahya Ibrahim", "Shaykh Navaid Aziz", "Shaykh Abdullah Hakim Quick",
+  "Shaykh Ahsan Hanif", "Shaykh Akram Nadwi", "Shaykh Mohammed Aslam",
+  "Quran Weekly", "Quran for Kids", "Learn Arabic with Maha",
+  "Bayan Online", "Madinah Arabic", "Madrasah Online",
+  "Productive Muslim Academy", "Muslim CEO",
 ];
 
 export function isTrustedChannel(channelTitle: string): boolean {
