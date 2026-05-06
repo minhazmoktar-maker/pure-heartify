@@ -46,7 +46,19 @@ const HARD_REJECT_KEYWORDS = [
   "exposed scandal",
 ];
 
-// Female-presenting visual content rules (per moderation policy: no female faces/visuals).
+// Hard-blocked creators (channel name OR mention in title/description triggers reject).
+const BLOCKED_CREATORS: string[] = [
+  "mia yilin", "mehreen", "leila hormozi", "layla hormozi",
+];
+
+// Channels where ONLY female-free content should pass: if title/desc mentions woman/female/sister/her,
+// reject. Used to keep e.g. Sami Yusuf and "Why They Converted" male-only.
+const FEMALE_SENSITIVE_CHANNELS: string[] = [
+  "sami yusuf", "sami yousuf", "why they converted",
+];
+const FEMALE_MENTION_RE = /\b(woman|women|female|girl|sister|her story|she |actress|songstress|hijabi)\b/i;
+
+
 // Tracked separately so the moderation log can flag the exact reason.
 const FEMALE_VISUAL_KEYWORDS = [
   "makeup tutorial", "makeup look", "hijab tutorial", "hijab style", "hijab fashion",
@@ -262,6 +274,18 @@ interface Verdict {
 
 function evaluateText(title: string, description: string, channelTitle: string, trusted: boolean): Verdict {
   const text = `${title} ${description} ${channelTitle}`.toLowerCase();
+  const channelLower = channelTitle.toLowerCase();
+
+  for (const blocked of BLOCKED_CREATORS) {
+    if (channelLower.includes(blocked) || text.includes(blocked)) {
+      return { ok: false, score: 0, reason: "blocked_creator", rule: blocked };
+    }
+  }
+  for (const sensitive of FEMALE_SENSITIVE_CHANNELS) {
+    if (channelLower.includes(sensitive) && FEMALE_MENTION_RE.test(`${title} ${description}`)) {
+      return { ok: false, score: 0, reason: "female_in_sensitive_channel", rule: sensitive };
+    }
+  }
 
   for (const kw of HARD_REJECT_KEYWORDS) {
     if (text.includes(kw.toLowerCase())) {
@@ -305,7 +329,7 @@ function evaluateText(title: string, description: string, channelTitle: string, 
   score += 20;
   score += trusted ? 25 : 5;
   score += 20;
-  return { ok: true, score: Math.min(score, 95) };
+  return { ok: true, score: Math.min(score, 85) };
 }
 
 // === Optional vision-based thumbnail check (Lovable AI) ===
