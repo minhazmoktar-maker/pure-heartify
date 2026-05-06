@@ -17,7 +17,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const MAX_PER_SECTION = 800;
 const MAX_PER_CREATOR_PER_SECTION = 3;
-const MAX_AGE_DAYS = 180;
+// No age-based pruning — we want a million-video catalog over time.
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -74,22 +74,16 @@ async function refreshSection(sectionId: string) {
   const rows = await fetchSection(sectionId);
   if (!rows.length) return { sectionId, kept: 0, dropped: 0 };
 
-  const now = Date.now();
-  const maxAgeMs = MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
   const toDelete: string[] = [];
   const perCreator = new Map<string, number>();
 
   // Already sorted newest -> oldest. Walk in order; keep up to caps; delete the rest.
   let kept = 0;
   for (const r of rows) {
-    const ageMs = now - new Date(r.published_at ?? r.ingested_at).getTime();
-    const tooOld = ageMs > maxAgeMs && !(r.is_trusted_channel && r.view_count > 10000);
-
     const creatorKey = (r.channel_title || "unknown").toLowerCase().trim();
     const creatorCount = perCreator.get(creatorKey) ?? 0;
 
     if (
-      tooOld ||
       kept >= MAX_PER_SECTION ||
       creatorCount >= MAX_PER_CREATOR_PER_SECTION
     ) {
