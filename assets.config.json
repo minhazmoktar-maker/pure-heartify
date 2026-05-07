@@ -1,0 +1,12 @@
+{
+  "icon": {
+    "source": "public/icons/icon-source.png",
+    "backgroundColor": "#0F172A",
+    "backgroundColorDark": "#0F172A"
+  },
+  "splash": {
+    "source": "public/icons/splash-source.png",
+    "backgroundColor": "#0F172A",
+    "backgroundColorDark": "#0F172A"
+  }
+}
