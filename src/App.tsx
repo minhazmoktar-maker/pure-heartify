@@ -19,6 +19,7 @@ import Profile from "./pages/Profile.tsx";
 import Channels from "./pages/Channels.tsx";
 import ModerationLog from "./pages/ModerationLog.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import { MobileBridge } from "./components/MobileBridge";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <MobileBridge />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/watch/:videoId" element={<Watch />} />
