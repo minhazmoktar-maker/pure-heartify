@@ -479,7 +479,38 @@ export const TRUSTED_CHANNELS: string[] = [
   "Quran Weekly", "Quran for Kids", "Learn Arabic with Maha",
   "Bayan Online", "Madinah Arabic", "Madrasah Online",
   "Productive Muslim Academy", "Muslim CEO",
+
+  // XXVI. Discipline, success, money mindset, educational deep-dives, podcasts (added)
+  "James Clear", "Atomic Habits", "Cal Newport", "Deep Work",
+  "Andrew Huberman lab clips clean", "Modern Wisdom clips",
+  "Dr. Tariq Ramadan", "Sheikh Mokhtar Maghraoui",
+  "Yaqeen Lectures", "Yaqeen Shorts",
+  "Halal Habits", "Sunnah Productivity", "Muslim Mindset Reset",
+  "The Halal Investor Show", "Halal Money Talk", "Muslim Wealth Builders",
+  "Riba-Free", "Shariah Investor", "Halal Property Investing",
+  "Muslim Financial Coach", "Faithful Wealth", "The Muslim Money Mentor",
+  "Discipline Deen", "Focus Iman", "Sunnah Routine",
+  "Productive Salah", "Muslim Morning Routine", "5AM Iman",
+  "TED-Ed", "BBC Earth", "PBS Eons", "PBS Space Time",
+  "World Science Festival", "Royal Institution", "Numberphile", "Computerphile",
+  "3Blue1Brown", "Mark Rober", "Steve Mould", "Practical Engineering",
+  "Wendover Productions", "Real Engineering", "Kurzgesagt – In a Nutshell",
+  "MinutePhysics", "MinuteEarth", "SciShow", "It's Okay To Be Smart",
+  "Great Big Story", "National Geographic", "Smithsonian Channel",
+  "Mufti Menk Podcast", "OnePath Network Podcast", "Yaqeen Podcast",
+  "The Mad Mamluks Podcast", "Blogging Theology Podcast",
+  "Productive Muslim Podcast", "Muslim CEO Podcast", "Halal Money Matters Podcast",
+  "IFG Podcast", "Practical Islamic Finance Podcast",
+  "Holy Tune", "HolyTune", "HolyTune Quran", "Holy Tune Recitation",
+  "Heart Touching Recitations", "Soul Recitation", "Calm Recitation",
+  "Halal Documentaries", "Islamic History Channel", "Lost Islamic History",
+  "Muslim Skeptic", "Daniel Haqiqatjou",
+  "Sheikh Uthman Ibn Farooq", "Eli Saman", "Subboor Ahmad",
+  "Kamil Ahmad", "Asim Khan", "Wisam Sharieff", "Quran Revolution",
+  "Bayyinah TV", "Qalam Institute Podcast",
+  "Faith IQ", "Yaqeen Q&A", "Seekers Answers",
 ];
+
 
 export function isTrustedChannel(channelTitle: string): boolean {
   const lower = channelTitle.toLowerCase();
