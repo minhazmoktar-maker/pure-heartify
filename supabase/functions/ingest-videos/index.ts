@@ -854,7 +854,9 @@ Deno.serve(async (req) => {
       totalAdded,
       totalQuota,
       rejectedCount,
-      message: `Ingested ${totalAdded} new videos (~${totalQuota} quota units used). Rejected ${rejectedCount} this run.`,
+      keysConfigured: YOUTUBE_API_KEYS.length,
+      keysActive: activeKeys().length,
+      message: `Ingested ${totalAdded} new videos (~${totalQuota} quota units, ${activeKeys().length}/${YOUTUBE_API_KEYS.length} keys active). Rejected ${rejectedCount} this run.`,
     });
   } catch (error) {
     console.error("Ingestion error:", error);
