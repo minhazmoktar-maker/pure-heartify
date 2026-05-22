@@ -728,11 +728,10 @@ async function ingestDiscoveryQuery(sectionId: string, query: string): Promise<{
     order: "relevance",
     videoEmbeddable: "true",
     videoSyndicated: "true",
-    key: YOUTUBE_API_KEY!,
   });
-  const res = await fetch(`${BASE_URL}/search?${params}`);
-  if (!res.ok) return { added: 0, quota: 100 };
-  const data = await res.json();
+  const r = await ytFetch("search", params);
+  if (!r.ok) return { added: 0, quota: 100 };
+  const data = r.data as { items?: Array<Record<string, any>> };
 
   const rows: Record<string, unknown>[] = [];
   for (const item of data.items ?? []) {
