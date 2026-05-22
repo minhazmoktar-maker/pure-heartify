@@ -21,10 +21,63 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const YOUTUBE_API_KEY = Deno.env.get("YOUTUBE_API_KEY");
+const YOUTUBE_API_KEYS: string[] = [
+  Deno.env.get("YOUTUBE_API_KEY"),
+  Deno.env.get("YOUTUBE_API_KEY_2"),
+].filter((k): k is string => !!k && k.length > 0);
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 const BASE_URL = "https://www.googleapis.com/youtube/v3";
+
+// === API key rotation ===
+// Round-robin across configured keys, auto-skip exhausted keys for the remainder of the run.
+const exhaustedKeys = new Set<string>();
+let keyCursor = 0;
+function activeKeys(): string[] {
+  return YOUTUBE_API_KEYS.filter((k) => !exhaustedKeys.has(k));
+}
+function currentKey(): string | null {
+  const pool = activeKeys();
+  if (!pool.length) return null;
+  return pool[keyCursor % pool.length];
+}
+function rotateKey() {
+  keyCursor++;
+}
+function markExhausted(k: string) {
+  exhaustedKeys.add(k);
+  console.warn(`[quota] key ending …${k.slice(-6)} exhausted; ${activeKeys().length} key(s) remain`);
+}
+
+/**
+ * Fetch from YouTube with automatic key rotation on quotaExceeded.
+ * Returns the parsed JSON or null if all keys are exhausted / hard error.
+ */
+async function ytFetch(
+  endpoint: string,
+  params: URLSearchParams,
+): Promise<{ ok: boolean; status: number; data: unknown }> {
+  for (let attempt = 0; attempt < YOUTUBE_API_KEYS.length + 1; attempt++) {
+    const key = currentKey();
+    if (!key) return { ok: false, status: 429, data: { error: "all_keys_exhausted" } };
+    params.set("key", key);
+    const res = await fetch(`${BASE_URL}/${endpoint}?${params}`);
+    if (res.ok) {
+      const data = await res.json();
+      return { ok: true, status: 200, data };
+    }
+    const body = await res.text();
+    const quotaExceeded = res.status === 403 && /quotaExceeded|dailyLimitExceeded/i.test(body);
+    if (quotaExceeded) {
+      markExhausted(key);
+      rotateKey();
+      continue;
+    }
+    console.error(`YouTube ${endpoint} ${res.status}: ${body.slice(0, 200)}`);
+    return { ok: false, status: res.status, data: body };
+  }
+  return { ok: false, status: 429, data: { error: "all_keys_exhausted" } };
+}
 
 // === Halal scoring ===
 const HARD_REJECT_KEYWORDS = [
