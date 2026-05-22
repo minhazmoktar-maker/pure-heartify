@@ -798,20 +798,22 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
-  if (!YOUTUBE_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    return json({ error: "Missing configuration" }, 500);
+  if (!YOUTUBE_API_KEYS.length || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    return json({ error: "Missing configuration: at least one YOUTUBE_API_KEY required" }, 500);
   }
 
   try {
     const body = await req.json().catch(() => ({}));
     const mode: "channels" | "discovery" | "both" = body?.mode ?? "both";
-    // Per 3-hour run, target ~5,000 quota units max (8 runs/day = 40k → safe under 10k/day if we tune):
-    // Actually we have 10k/day total. 8 runs/day → 1,250/run.
-    // channels_per_run=80 channels (avg ~1 quota each after first resolve) ≈ 80
-    // discovery_queries=10 (10 * 100 = 1000)
-    // Total per run ≈ 1,080 → 8,640/day. Safe.
-    const channelsPerRun = Math.min(body?.channels_per_run ?? 80, 200);
-    const discoveryQueries = Math.min(body?.discovery_queries ?? 10, 30);
+    // Quota math with N keys (N * 10,000/day total, 8 runs/day → N * 1,250/run):
+    //   - channels track: ~1 unit per channel after one-time resolve (handle path = 1 unit, search path = 101)
+    //   - discovery track: 100 units per query
+    // With 2 keys ⇒ 20k/day budget, target ~2,500/run.
+    const keyMultiplier = Math.max(activeKeys().length, 1);
+    const channelsPerRun = Math.min(body?.channels_per_run ?? 80 * keyMultiplier, 300);
+    const discoveryQueries = Math.min(body?.discovery_queries ?? 10 * keyMultiplier, 40);
+    // Hard safety cap: leave ~10% headroom of total daily budget per run.
+    const perRunQuotaCap = 1200 * keyMultiplier;
 
     let totalAdded = 0;
     let totalQuota = 0;
@@ -820,10 +822,11 @@ Deno.serve(async (req) => {
       await ensureChannelsSeeded();
       const stale = await pickStaleChannels(channelsPerRun);
       for (const ch of stale) {
+        if (!activeKeys().length) break;
         const r = await ingestChannel(ch);
         totalAdded += r.added;
         totalQuota += r.quota;
-        if (totalQuota > 8000) break; // safety
+        if (totalQuota > perRunQuotaCap * 0.75) break;
       }
     }
 
@@ -832,13 +835,13 @@ Deno.serve(async (req) => {
       for (const [sec, qs] of Object.entries(SECTION_QUERIES)) {
         for (const q of qs) allQueries.push([sec, q]);
       }
-      // Shuffle and take a slice each run to spread coverage
       allQueries.sort(() => Math.random() - 0.5);
       for (const [sec, q] of allQueries.slice(0, discoveryQueries)) {
+        if (!activeKeys().length) break;
         const r = await ingestDiscoveryQuery(sec, q);
         totalAdded += r.added;
         totalQuota += r.quota;
-        if (totalQuota > 9500) break;
+        if (totalQuota > perRunQuotaCap) break;
       }
     }
 
