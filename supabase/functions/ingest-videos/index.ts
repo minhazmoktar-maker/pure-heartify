@@ -554,34 +554,46 @@ async function ensureChannelsSeeded() {
   }).catch((e) => console.error("seed channels error", e));
 }
 
-async function resolveChannel(channelName: string): Promise<{ channelId: string; uploadsPlaylistId: string } | null> {
-  // 1 quota for search.list (100 units) — only do this once per channel, then cache
-  const searchParams = new URLSearchParams({
-    part: "snippet",
-    q: channelName,
-    type: "channel",
-    maxResults: "1",
-    key: YOUTUBE_API_KEY!,
-  });
-  const sr = await fetch(`${BASE_URL}/search?${searchParams}`);
-  if (!sr.ok) return null;
-  const sd = await sr.json();
-  const channelId = sd.items?.[0]?.id?.channelId;
-  if (!channelId) return null;
+async function resolveChannel(channelName: string): Promise<{ channelId: string; uploadsPlaylistId: string; quota: number } | null> {
+  let quota = 0;
+  let channelId: string | undefined;
 
-  // channels.list to get uploads playlist (1 quota unit)
-  const cParams = new URLSearchParams({
-    part: "contentDetails",
-    id: channelId,
-    key: YOUTUBE_API_KEY!,
-  });
-  const cr = await fetch(`${BASE_URL}/channels?${cParams}`);
+  // Cheap path: if name already looks like a YouTube channel ID or @handle, use channels.list (1 unit).
+  const trimmed = channelName.trim();
+  if (/^UC[A-Za-z0-9_-]{22}$/.test(trimmed)) {
+    channelId = trimmed;
+  } else if (trimmed.startsWith("@")) {
+    const params = new URLSearchParams({ part: "contentDetails,id", forHandle: trimmed });
+    const r = await ytFetch("channels", params);
+    quota += 1;
+    if (r.ok) {
+      const d = r.data as { items?: Array<{ id?: string; contentDetails?: { relatedPlaylists?: { uploads?: string } } }> };
+      const item = d.items?.[0];
+      if (item?.id && item.contentDetails?.relatedPlaylists?.uploads) {
+        return { channelId: item.id, uploadsPlaylistId: item.contentDetails.relatedPlaylists.uploads, quota };
+      }
+    }
+  }
+
+  if (!channelId) {
+    // Expensive fallback: search.list (100 units) — only once per channel, then cached.
+    const sParams = new URLSearchParams({ part: "snippet", q: channelName, type: "channel", maxResults: "1" });
+    const sr = await ytFetch("search", sParams);
+    quota += 100;
+    if (!sr.ok) return null;
+    const sd = sr.data as { items?: Array<{ id?: { channelId?: string } }> };
+    channelId = sd.items?.[0]?.id?.channelId;
+    if (!channelId) return null;
+  }
+
+  const cParams = new URLSearchParams({ part: "contentDetails", id: channelId });
+  const cr = await ytFetch("channels", cParams);
+  quota += 1;
   if (!cr.ok) return null;
-  const cd = await cr.json();
+  const cd = cr.data as { items?: Array<{ contentDetails?: { relatedPlaylists?: { uploads?: string } } }> };
   const uploads = cd.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
   if (!uploads) return null;
-
-  return { channelId, uploadsPlaylistId: uploads };
+  return { channelId, uploadsPlaylistId: uploads, quota };
 }
 
 interface ChannelStateRow {
