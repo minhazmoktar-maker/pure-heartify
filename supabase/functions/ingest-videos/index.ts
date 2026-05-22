@@ -21,10 +21,63 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const YOUTUBE_API_KEY = Deno.env.get("YOUTUBE_API_KEY");
+const YOUTUBE_API_KEYS: string[] = [
+  Deno.env.get("YOUTUBE_API_KEY"),
+  Deno.env.get("YOUTUBE_API_KEY_2"),
+].filter((k): k is string => !!k && k.length > 0);
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 const BASE_URL = "https://www.googleapis.com/youtube/v3";
+
+// === API key rotation ===
+// Round-robin across configured keys, auto-skip exhausted keys for the remainder of the run.
+const exhaustedKeys = new Set<string>();
+let keyCursor = 0;
+function activeKeys(): string[] {
+  return YOUTUBE_API_KEYS.filter((k) => !exhaustedKeys.has(k));
+}
+function currentKey(): string | null {
+  const pool = activeKeys();
+  if (!pool.length) return null;
+  return pool[keyCursor % pool.length];
+}
+function rotateKey() {
+  keyCursor++;
+}
+function markExhausted(k: string) {
+  exhaustedKeys.add(k);
+  console.warn(`[quota] key ending …${k.slice(-6)} exhausted; ${activeKeys().length} key(s) remain`);
+}
+
+/**
+ * Fetch from YouTube with automatic key rotation on quotaExceeded.
+ * Returns the parsed JSON or null if all keys are exhausted / hard error.
+ */
+async function ytFetch(
+  endpoint: string,
+  params: URLSearchParams,
+): Promise<{ ok: boolean; status: number; data: unknown }> {
+  for (let attempt = 0; attempt < YOUTUBE_API_KEYS.length + 1; attempt++) {
+    const key = currentKey();
+    if (!key) return { ok: false, status: 429, data: { error: "all_keys_exhausted" } };
+    params.set("key", key);
+    const res = await fetch(`${BASE_URL}/${endpoint}?${params}`);
+    if (res.ok) {
+      const data = await res.json();
+      return { ok: true, status: 200, data };
+    }
+    const body = await res.text();
+    const quotaExceeded = res.status === 403 && /quotaExceeded|dailyLimitExceeded/i.test(body);
+    if (quotaExceeded) {
+      markExhausted(key);
+      rotateKey();
+      continue;
+    }
+    console.error(`YouTube ${endpoint} ${res.status}: ${body.slice(0, 200)}`);
+    return { ok: false, status: res.status, data: body };
+  }
+  return { ok: false, status: 429, data: { error: "all_keys_exhausted" } };
+}
 
 // === Halal scoring ===
 const HARD_REJECT_KEYWORDS = [
@@ -501,34 +554,46 @@ async function ensureChannelsSeeded() {
   }).catch((e) => console.error("seed channels error", e));
 }
 
-async function resolveChannel(channelName: string): Promise<{ channelId: string; uploadsPlaylistId: string } | null> {
-  // 1 quota for search.list (100 units) — only do this once per channel, then cache
-  const searchParams = new URLSearchParams({
-    part: "snippet",
-    q: channelName,
-    type: "channel",
-    maxResults: "1",
-    key: YOUTUBE_API_KEY!,
-  });
-  const sr = await fetch(`${BASE_URL}/search?${searchParams}`);
-  if (!sr.ok) return null;
-  const sd = await sr.json();
-  const channelId = sd.items?.[0]?.id?.channelId;
-  if (!channelId) return null;
+async function resolveChannel(channelName: string): Promise<{ channelId: string; uploadsPlaylistId: string; quota: number } | null> {
+  let quota = 0;
+  let channelId: string | undefined;
 
-  // channels.list to get uploads playlist (1 quota unit)
-  const cParams = new URLSearchParams({
-    part: "contentDetails",
-    id: channelId,
-    key: YOUTUBE_API_KEY!,
-  });
-  const cr = await fetch(`${BASE_URL}/channels?${cParams}`);
+  // Cheap path: if name already looks like a YouTube channel ID or @handle, use channels.list (1 unit).
+  const trimmed = channelName.trim();
+  if (/^UC[A-Za-z0-9_-]{22}$/.test(trimmed)) {
+    channelId = trimmed;
+  } else if (trimmed.startsWith("@")) {
+    const params = new URLSearchParams({ part: "contentDetails,id", forHandle: trimmed });
+    const r = await ytFetch("channels", params);
+    quota += 1;
+    if (r.ok) {
+      const d = r.data as { items?: Array<{ id?: string; contentDetails?: { relatedPlaylists?: { uploads?: string } } }> };
+      const item = d.items?.[0];
+      if (item?.id && item.contentDetails?.relatedPlaylists?.uploads) {
+        return { channelId: item.id, uploadsPlaylistId: item.contentDetails.relatedPlaylists.uploads, quota };
+      }
+    }
+  }
+
+  if (!channelId) {
+    // Expensive fallback: search.list (100 units) — only once per channel, then cached.
+    const sParams = new URLSearchParams({ part: "snippet", q: channelName, type: "channel", maxResults: "1" });
+    const sr = await ytFetch("search", sParams);
+    quota += 100;
+    if (!sr.ok) return null;
+    const sd = sr.data as { items?: Array<{ id?: { channelId?: string } }> };
+    channelId = sd.items?.[0]?.id?.channelId;
+    if (!channelId) return null;
+  }
+
+  const cParams = new URLSearchParams({ part: "contentDetails", id: channelId });
+  const cr = await ytFetch("channels", cParams);
+  quota += 1;
   if (!cr.ok) return null;
-  const cd = await cr.json();
+  const cd = cr.data as { items?: Array<{ contentDetails?: { relatedPlaylists?: { uploads?: string } } }> };
   const uploads = cd.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
   if (!uploads) return null;
-
-  return { channelId, uploadsPlaylistId: uploads };
+  return { channelId, uploadsPlaylistId: uploads, quota };
 }
 
 interface ChannelStateRow {
@@ -563,11 +628,11 @@ async function ingestChannel(state: ChannelStateRow): Promise<{ added: number; q
 
   if (!channelId || !uploadsId) {
     const resolved = await resolveChannel(state.channel_name);
-    quota += 101; // search(100) + channels(1)
     if (!resolved) {
       await updateChannelState(state.id, { last_pulled_at: new Date().toISOString() });
       return { added: 0, quota };
     }
+    quota += resolved.quota;
     channelId = resolved.channelId;
     uploadsId = resolved.uploadsPlaylistId;
     await updateChannelState(state.id, {
@@ -577,23 +642,22 @@ async function ingestChannel(state: ChannelStateRow): Promise<{ added: number; q
     });
   }
 
-  // Page through playlistItems (1 quota unit per page, 50 items per page)
+  // Page through playlistItems (1 quota unit per page, 50 items per page) — incremental cursor
   const params = new URLSearchParams({
     part: "snippet,contentDetails",
     playlistId: uploadsId,
     maxResults: "50",
-    key: YOUTUBE_API_KEY!,
   });
   if (state.next_page_token) params.set("pageToken", state.next_page_token);
 
-  const res = await fetch(`${BASE_URL}/playlistItems?${params}`);
+  const r = await ytFetch("playlistItems", params);
   quota += 1;
-  if (!res.ok) {
-    console.error(`playlistItems failed for ${state.channel_name}: ${res.status}`);
+  if (!r.ok) {
+    console.error(`playlistItems failed for ${state.channel_name}: ${r.status}`);
     await updateChannelState(state.id, { last_pulled_at: new Date().toISOString() });
     return { added: 0, quota };
   }
-  const data = await res.json();
+  const data = r.data as { items?: Array<Record<string, unknown>>; nextPageToken?: string };
   const items = data.items ?? [];
   const nextToken = data.nextPageToken ?? null;
 
@@ -664,11 +728,10 @@ async function ingestDiscoveryQuery(sectionId: string, query: string): Promise<{
     order: "relevance",
     videoEmbeddable: "true",
     videoSyndicated: "true",
-    key: YOUTUBE_API_KEY!,
   });
-  const res = await fetch(`${BASE_URL}/search?${params}`);
-  if (!res.ok) return { added: 0, quota: 100 };
-  const data = await res.json();
+  const r = await ytFetch("search", params);
+  if (!r.ok) return { added: 0, quota: 100 };
+  const data = r.data as { items?: Array<Record<string, any>> };
 
   const rows: Record<string, unknown>[] = [];
   for (const item of data.items ?? []) {
@@ -735,20 +798,22 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
-  if (!YOUTUBE_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    return json({ error: "Missing configuration" }, 500);
+  if (!YOUTUBE_API_KEYS.length || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    return json({ error: "Missing configuration: at least one YOUTUBE_API_KEY required" }, 500);
   }
 
   try {
     const body = await req.json().catch(() => ({}));
     const mode: "channels" | "discovery" | "both" = body?.mode ?? "both";
-    // Per 3-hour run, target ~5,000 quota units max (8 runs/day = 40k → safe under 10k/day if we tune):
-    // Actually we have 10k/day total. 8 runs/day → 1,250/run.
-    // channels_per_run=80 channels (avg ~1 quota each after first resolve) ≈ 80
-    // discovery_queries=10 (10 * 100 = 1000)
-    // Total per run ≈ 1,080 → 8,640/day. Safe.
-    const channelsPerRun = Math.min(body?.channels_per_run ?? 80, 200);
-    const discoveryQueries = Math.min(body?.discovery_queries ?? 10, 30);
+    // Quota math with N keys (N * 10,000/day total, 8 runs/day → N * 1,250/run):
+    //   - channels track: ~1 unit per channel after one-time resolve (handle path = 1 unit, search path = 101)
+    //   - discovery track: 100 units per query
+    // With 2 keys ⇒ 20k/day budget, target ~2,500/run.
+    const keyMultiplier = Math.max(activeKeys().length, 1);
+    const channelsPerRun = Math.min(body?.channels_per_run ?? 80 * keyMultiplier, 300);
+    const discoveryQueries = Math.min(body?.discovery_queries ?? 10 * keyMultiplier, 40);
+    // Hard safety cap: leave ~10% headroom of total daily budget per run.
+    const perRunQuotaCap = 1200 * keyMultiplier;
 
     let totalAdded = 0;
     let totalQuota = 0;
@@ -757,10 +822,11 @@ Deno.serve(async (req) => {
       await ensureChannelsSeeded();
       const stale = await pickStaleChannels(channelsPerRun);
       for (const ch of stale) {
+        if (!activeKeys().length) break;
         const r = await ingestChannel(ch);
         totalAdded += r.added;
         totalQuota += r.quota;
-        if (totalQuota > 8000) break; // safety
+        if (totalQuota > perRunQuotaCap * 0.75) break;
       }
     }
 
@@ -769,13 +835,13 @@ Deno.serve(async (req) => {
       for (const [sec, qs] of Object.entries(SECTION_QUERIES)) {
         for (const q of qs) allQueries.push([sec, q]);
       }
-      // Shuffle and take a slice each run to spread coverage
       allQueries.sort(() => Math.random() - 0.5);
       for (const [sec, q] of allQueries.slice(0, discoveryQueries)) {
+        if (!activeKeys().length) break;
         const r = await ingestDiscoveryQuery(sec, q);
         totalAdded += r.added;
         totalQuota += r.quota;
-        if (totalQuota > 9500) break;
+        if (totalQuota > perRunQuotaCap) break;
       }
     }
 
@@ -788,7 +854,9 @@ Deno.serve(async (req) => {
       totalAdded,
       totalQuota,
       rejectedCount,
-      message: `Ingested ${totalAdded} new videos (~${totalQuota} quota units used). Rejected ${rejectedCount} this run.`,
+      keysConfigured: YOUTUBE_API_KEYS.length,
+      keysActive: activeKeys().length,
+      message: `Ingested ${totalAdded} new videos (~${totalQuota} quota units, ${activeKeys().length}/${YOUTUBE_API_KEYS.length} keys active). Rejected ${rejectedCount} this run.`,
     });
   } catch (error) {
     console.error("Ingestion error:", error);
