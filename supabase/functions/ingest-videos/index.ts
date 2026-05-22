@@ -628,11 +628,11 @@ async function ingestChannel(state: ChannelStateRow): Promise<{ added: number; q
 
   if (!channelId || !uploadsId) {
     const resolved = await resolveChannel(state.channel_name);
-    quota += 101; // search(100) + channels(1)
     if (!resolved) {
       await updateChannelState(state.id, { last_pulled_at: new Date().toISOString() });
       return { added: 0, quota };
     }
+    quota += resolved.quota;
     channelId = resolved.channelId;
     uploadsId = resolved.uploadsPlaylistId;
     await updateChannelState(state.id, {
@@ -642,23 +642,22 @@ async function ingestChannel(state: ChannelStateRow): Promise<{ added: number; q
     });
   }
 
-  // Page through playlistItems (1 quota unit per page, 50 items per page)
+  // Page through playlistItems (1 quota unit per page, 50 items per page) — incremental cursor
   const params = new URLSearchParams({
     part: "snippet,contentDetails",
     playlistId: uploadsId,
     maxResults: "50",
-    key: YOUTUBE_API_KEY!,
   });
   if (state.next_page_token) params.set("pageToken", state.next_page_token);
 
-  const res = await fetch(`${BASE_URL}/playlistItems?${params}`);
+  const r = await ytFetch("playlistItems", params);
   quota += 1;
-  if (!res.ok) {
-    console.error(`playlistItems failed for ${state.channel_name}: ${res.status}`);
+  if (!r.ok) {
+    console.error(`playlistItems failed for ${state.channel_name}: ${r.status}`);
     await updateChannelState(state.id, { last_pulled_at: new Date().toISOString() });
     return { added: 0, quota };
   }
-  const data = await res.json();
+  const data = r.data as { items?: Array<Record<string, unknown>>; nextPageToken?: string };
   const items = data.items ?? [];
   const nextToken = data.nextPageToken ?? null;
 
