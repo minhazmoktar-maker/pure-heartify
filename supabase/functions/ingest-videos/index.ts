@@ -97,6 +97,14 @@ const HARD_REJECT_KEYWORDS = [
   "gameplay", "battle royale gaming", "GTA gameplay",
   "prank gone wrong", "trolling", "celebrity gossip",
   "exposed scandal",
+  // Additional strict halal reinforcements
+  "porn", "porno", "pornography", "nude", "nudity", "nudes", "naked",
+  "explicit", "xxx", "erotic", "erotica", "sex tape", "sex scene",
+  "onlyfans", "only fans", "thirst trap", "twerk", "twerking",
+  "stripper", "strip club", "escort", "brothel", "intimate scene",
+  "boobs", "boob", "cleavage", "thicc", "thigh", "thighs",
+  "asmr girl", "asmr mukbang", "tinder date", "bumble", "rizz",
+  "drunk vlog", "vape", "weed review", "marijuana", "cannabis review",
 ];
 
 // Hard-blocked creators (channel name OR mention in title/description triggers reject).
@@ -311,6 +319,28 @@ const TRUSTED_CHANNELS: string[] = [
   "Deen Tips", "Islamic Reflection", "Muslim Path", "Faith Steps", "Muslim Growth",
   "Deen First", "Halal Inspiration", "Muslim Goals", "Islam for Life", "Quran Light",
   "Sunnah Way", "Faith Forward", "Muslim Beacon", "Deen Guide", "Barakah Path", "The Clear Path",
+  // === XXVII. Expanded library: News, Tech/AI, Entrepreneurship, Science, Personal Development ===
+  // News & current affairs
+  "Al Jazeera English", "Al Jazeera Documentary", "AJ+", "TRT World",
+  "DW News", "DW Documentary", "BBC News", "Middle East Eye",
+  // Tech & AI
+  "Lex Fridman", "Two Minute Papers", "Yannic Kilcher", "Sentdex",
+  "Fireship", "ThePrimeagen", "Theo - t3.gg", "MIT OpenCourseWare",
+  "Stanford Online", "DeepLearningAI", "Google DeepMind",
+  // Entrepreneurship & business (family-safe)
+  "Y Combinator", "Startup Grind", "How I Built This", "a16z",
+  "TED", "TEDx Talks", "Harvard Business Review", "Stanford Graduate School of Business",
+  // Personal development & productivity (clean creators)
+  "Ali Abdaal", "Thomas Frank", "Matt D'Avella", "Cal Newport",
+  "Modern Wisdom", "James Clear",
+  // Science documentaries & education
+  "Kurzgesagt – In a Nutshell", "Veritasium", "3Blue1Brown", "MinutePhysics",
+  "MinuteEarth", "SmarterEveryDay", "PBS Space Time", "PBS Eons",
+  "Royal Institution", "World Science Festival", "BBC Earth",
+  "National Geographic", "Smithsonian Channel", "Numberphile", "Computerphile",
+  "Khan Academy", "CrashCourse", "TED-Ed",
+  // Health/fitness (audio-led, no sexualized imagery)
+  "Huberman Lab Clips", "Andrew Huberman",
 ];
 
 function isTrusted(channel: string): boolean {
@@ -476,6 +506,40 @@ const SECTION_QUERIES: Record<string, string[]> = {
   "elite-recitation": ["Mishary Rashid Alafasy full surah", "Omar Hisham Al Arabi Quran"],
   "advanced-learning": ["Arabic with Husna", "SeekersGuidance Global"],
   "live-streams": ["Makkah Live stream", "Madinah Live stream"],
+  // === Expanded curated content sections ===
+  "technology-ai": [
+    "artificial intelligence explained", "machine learning tutorial",
+    "AI safety lecture", "Lex Fridman AI", "Two Minute Papers AI",
+    "computer science lecture MIT",
+  ],
+  "entrepreneurship": [
+    "startup advice founder", "Y Combinator startup school",
+    "halal entrepreneurship", "small business owner journey",
+    "first principles thinking business",
+  ],
+  "personal-development": [
+    "habit formation atomic habits", "deep work cal newport",
+    "stoicism daily practice", "discipline mindset lecture",
+    "productivity system explained",
+  ],
+  "science-documentaries": [
+    "Kurzgesagt", "Veritasium experiment", "PBS Space Time",
+    "BBC Earth documentary", "National Geographic explorer",
+    "3Blue1Brown math",
+  ],
+  "news-current-affairs": [
+    "Al Jazeera English news", "Al Jazeera Documentary",
+    "TRT World analysis", "Middle East news report",
+    "geopolitics explained",
+  ],
+  "huberman-health": [
+    "Huberman Lab clips", "sleep science explained",
+    "exercise physiology lecture", "nutrition science evidence based",
+  ],
+  "islamic-history": [
+    "Islamic civilization history", "Ottoman empire documentary clean",
+    "Andalusia Muslim Spain", "biography Companions of the Prophet",
+  ],
 };
 
 function decodeHtml(html: string): string {
