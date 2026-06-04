@@ -319,6 +319,28 @@ const TRUSTED_CHANNELS: string[] = [
   "Deen Tips", "Islamic Reflection", "Muslim Path", "Faith Steps", "Muslim Growth",
   "Deen First", "Halal Inspiration", "Muslim Goals", "Islam for Life", "Quran Light",
   "Sunnah Way", "Faith Forward", "Muslim Beacon", "Deen Guide", "Barakah Path", "The Clear Path",
+  // === XXVII. Expanded library: News, Tech/AI, Entrepreneurship, Science, Personal Development ===
+  // News & current affairs
+  "Al Jazeera English", "Al Jazeera Documentary", "AJ+", "TRT World",
+  "DW News", "DW Documentary", "BBC News", "Middle East Eye",
+  // Tech & AI
+  "Lex Fridman", "Two Minute Papers", "Yannic Kilcher", "Sentdex",
+  "Fireship", "ThePrimeagen", "Theo - t3.gg", "MIT OpenCourseWare",
+  "Stanford Online", "DeepLearningAI", "Google DeepMind",
+  // Entrepreneurship & business (family-safe)
+  "Y Combinator", "Startup Grind", "How I Built This", "a16z",
+  "TED", "TEDx Talks", "Harvard Business Review", "Stanford Graduate School of Business",
+  // Personal development & productivity (clean creators)
+  "Ali Abdaal", "Thomas Frank", "Matt D'Avella", "Cal Newport",
+  "Modern Wisdom", "James Clear",
+  // Science documentaries & education
+  "Kurzgesagt – In a Nutshell", "Veritasium", "3Blue1Brown", "MinutePhysics",
+  "MinuteEarth", "SmarterEveryDay", "PBS Space Time", "PBS Eons",
+  "Royal Institution", "World Science Festival", "BBC Earth",
+  "National Geographic", "Smithsonian Channel", "Numberphile", "Computerphile",
+  "Khan Academy", "CrashCourse", "TED-Ed",
+  // Health/fitness (audio-led, no sexualized imagery)
+  "Huberman Lab Clips", "Andrew Huberman",
 ];
 
 function isTrusted(channel: string): boolean {
