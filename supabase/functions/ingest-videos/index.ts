@@ -97,6 +97,14 @@ const HARD_REJECT_KEYWORDS = [
   "gameplay", "battle royale gaming", "GTA gameplay",
   "prank gone wrong", "trolling", "celebrity gossip",
   "exposed scandal",
+  // Additional strict halal reinforcements
+  "porn", "porno", "pornography", "nude", "nudity", "nudes", "naked",
+  "explicit", "xxx", "erotic", "erotica", "sex tape", "sex scene",
+  "onlyfans", "only fans", "thirst trap", "twerk", "twerking",
+  "stripper", "strip club", "escort", "brothel", "intimate scene",
+  "boobs", "boob", "cleavage", "thicc", "thigh", "thighs",
+  "asmr girl", "asmr mukbang", "tinder date", "bumble", "rizz",
+  "drunk vlog", "vape", "weed review", "marijuana", "cannabis review",
 ];
 
 // Hard-blocked creators (channel name OR mention in title/description triggers reject).
@@ -476,6 +484,40 @@ const SECTION_QUERIES: Record<string, string[]> = {
   "elite-recitation": ["Mishary Rashid Alafasy full surah", "Omar Hisham Al Arabi Quran"],
   "advanced-learning": ["Arabic with Husna", "SeekersGuidance Global"],
   "live-streams": ["Makkah Live stream", "Madinah Live stream"],
+  // === Expanded curated content sections ===
+  "technology-ai": [
+    "artificial intelligence explained", "machine learning tutorial",
+    "AI safety lecture", "Lex Fridman AI", "Two Minute Papers AI",
+    "computer science lecture MIT",
+  ],
+  "entrepreneurship": [
+    "startup advice founder", "Y Combinator startup school",
+    "halal entrepreneurship", "small business owner journey",
+    "first principles thinking business",
+  ],
+  "personal-development": [
+    "habit formation atomic habits", "deep work cal newport",
+    "stoicism daily practice", "discipline mindset lecture",
+    "productivity system explained",
+  ],
+  "science-documentaries": [
+    "Kurzgesagt", "Veritasium experiment", "PBS Space Time",
+    "BBC Earth documentary", "National Geographic explorer",
+    "3Blue1Brown math",
+  ],
+  "news-current-affairs": [
+    "Al Jazeera English news", "Al Jazeera Documentary",
+    "TRT World analysis", "Middle East news report",
+    "geopolitics explained",
+  ],
+  "huberman-health": [
+    "Huberman Lab clips", "sleep science explained",
+    "exercise physiology lecture", "nutrition science evidence based",
+  ],
+  "islamic-history": [
+    "Islamic civilization history", "Ottoman empire documentary clean",
+    "Andalusia Muslim Spain", "biography Companions of the Prophet",
+  ],
 };
 
 function decodeHtml(html: string): string {
