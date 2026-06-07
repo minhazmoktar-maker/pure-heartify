@@ -47,6 +47,7 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/channels" element={<Channels />} />
               <Route path="/admin/moderation" element={<ModerationLog />} />
+              <Route path="/admin/audit" element={<Audit />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
