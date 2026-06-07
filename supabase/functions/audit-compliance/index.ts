@@ -82,8 +82,29 @@ async function pg(path: string, init: RequestInit = {}) {
   return res;
 }
 
+async function requireAdmin(req: Request): Promise<boolean> {
+  const auth = req.headers.get("Authorization");
+  if (!auth) return false;
+  const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    headers: { apikey: SERVICE_KEY, Authorization: auth },
+  });
+  if (!userRes.ok) return false;
+  const { id } = await userRes.json();
+  if (!id) return false;
+  const roleRes = await pg(`user_roles?user_id=eq.${id}&role=eq.admin&select=role`);
+  if (!roleRes.ok) return false;
+  const rows = await roleRes.json();
+  return Array.isArray(rows) && rows.length > 0;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  if (!(await requireAdmin(req))) {
+    return new Response(JSON.stringify({ error: "admin only" }), {
+      status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   let body: { limit?: number; thumb_sample?: number; delete_flagged?: boolean } = {};
   try { body = await req.json(); } catch { /* empty body ok */ }
