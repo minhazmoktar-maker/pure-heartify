@@ -18,6 +18,7 @@ import Privacy from "./pages/Privacy.tsx";
 import Profile from "./pages/Profile.tsx";
 import Channels from "./pages/Channels.tsx";
 import ModerationLog from "./pages/ModerationLog.tsx";
+import Audit from "./pages/Audit.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { MobileBridge } from "./components/MobileBridge";
 
