@@ -16,8 +16,10 @@ const Watch = () => {
   const { data: videos } = useYouTubeVideos("All");
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const completeDose = useCompleteDoseVideo();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [showOverlay, setShowOverlay] = useState(false);
+  const completedRef = useRef<string | null>(null);
 
   const currentVideo = videos?.find((v) => v.id === videoId);
   const relatedVideos = videos?.filter((v) => v.id !== videoId).slice(0, 8) ?? [];
