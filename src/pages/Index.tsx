@@ -42,6 +42,10 @@ const Index = () => {
       <Navbar />
       <HeroSection />
 
+      <DailyDoseHero />
+
+
+
       {/* Main tabs */}
       <div className="sticky top-16 z-40 border-b border-border bg-card/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1800px] items-center gap-0 px-4 md:px-6">
