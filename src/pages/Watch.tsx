@@ -7,6 +7,8 @@ import { useYouTubeVideos } from "@/hooks/useYouTubeVideos";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useCompleteDoseVideo } from "@/hooks/useDailyDose";
+import { toast } from "sonner";
 
 const Watch = () => {
   const { videoId } = useParams<{ videoId: string }>();
@@ -14,8 +16,10 @@ const Watch = () => {
   const { data: videos } = useYouTubeVideos("All");
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const completeDose = useCompleteDoseVideo();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [showOverlay, setShowOverlay] = useState(false);
+  const completedRef = useRef<string | null>(null);
 
   const currentVideo = videos?.find((v) => v.id === videoId);
   const relatedVideos = videos?.filter((v) => v.id !== videoId).slice(0, 8) ?? [];
@@ -38,6 +42,7 @@ const Watch = () => {
   // Listen for YouTube iframe API messages to detect video end
   useEffect(() => {
     setShowOverlay(false);
+    completedRef.current = null;
 
     const handleMessage = (event: MessageEvent) => {
       try {
@@ -46,6 +51,26 @@ const Watch = () => {
           // YouTube iframe API sends playerState: 0 when video ends
           if (data?.event === "onStateChange" && data?.info === 0) {
             setShowOverlay(true);
+            // Mark dose video complete (idempotent server-side)
+            if (user && videoId && completedRef.current !== videoId) {
+              completedRef.current = videoId;
+              completeDose.mutate(videoId, {
+                onSuccess: (res) => {
+                  if (res?.justCompleted) {
+                    toast.success("Alhamdulillah 🌿 Daily Dose complete", {
+                      description: `Streak: ${res.streak?.current_streak ?? 1} day${(res.streak?.current_streak ?? 1) === 1 ? "" : "s"}`,
+                      duration: 6000,
+                    });
+                  }
+                  if (res?.milestone) {
+                    toast(`🌟 ${res.milestone}-day milestone reached!`, {
+                      description: "Keep going — small daily steps, big transformation.",
+                      duration: 8000,
+                    });
+                  }
+                },
+              });
+            }
           }
         }
       } catch {
@@ -55,7 +80,7 @@ const Watch = () => {
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [videoId]);
+  }, [videoId, user, completeDose]);
 
   const handleNext = () => {
     if (nextVideo) {

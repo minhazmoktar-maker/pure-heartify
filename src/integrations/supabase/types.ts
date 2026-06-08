@@ -101,6 +101,42 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_dose: {
+        Row: {
+          completed_at: string | null
+          completed_count: number
+          created_at: string
+          dose_date: string
+          id: string
+          total_minutes: number
+          updated_at: string
+          user_id: string
+          video_ids: string[]
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_count?: number
+          created_at?: string
+          dose_date?: string
+          id?: string
+          total_minutes?: number
+          updated_at?: string
+          user_id: string
+          video_ids?: string[]
+        }
+        Update: {
+          completed_at?: string | null
+          completed_count?: number
+          created_at?: string
+          dose_date?: string
+          id?: string
+          total_minutes?: number
+          updated_at?: string
+          user_id?: string
+          video_ids?: string[]
+        }
+        Relationships: []
+      }
       device_tokens: {
         Row: {
           created_at: string
@@ -124,6 +160,38 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      dose_completions: {
+        Row: {
+          completed_at: string
+          dose_id: string
+          id: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          completed_at?: string
+          dose_id: string
+          id?: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          completed_at?: string
+          dose_id?: string
+          id?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dose_completions_dose_id_fkey"
+            columns: ["dose_id"]
+            isOneToOne: false
+            referencedRelation: "daily_dose"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       favorite_categories: {
         Row: {
@@ -278,6 +346,63 @@ export type Database = {
         }
         Relationships: []
       }
+      streaks: {
+        Row: {
+          created_at: string
+          current_streak: number
+          last_completed_date: string | null
+          longest_streak: number
+          total_doses_completed: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          last_completed_date?: string | null
+          longest_streak?: number
+          total_doses_completed?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          last_completed_date?: string | null
+          longest_streak?: number
+          total_doses_completed?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_interests: {
+        Row: {
+          created_at: string
+          exploration_interest: string | null
+          primary_interest: string
+          secondary_interest: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          exploration_interest?: string | null
+          primary_interest: string
+          secondary_interest?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          exploration_interest?: string | null
+          primary_interest?: string
+          secondary_interest?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -298,7 +423,10 @@ export type Database = {
       }
       watch_history: {
         Row: {
+          completed: boolean
+          duration_seconds: number
           id: string
+          progress_seconds: number
           thumbnail_url: string | null
           user_id: string
           video_id: string
@@ -306,7 +434,10 @@ export type Database = {
           watched_at: string
         }
         Insert: {
+          completed?: boolean
+          duration_seconds?: number
           id?: string
+          progress_seconds?: number
           thumbnail_url?: string | null
           user_id: string
           video_id: string
@@ -314,7 +445,10 @@ export type Database = {
           watched_at?: string
         }
         Update: {
+          completed?: boolean
+          duration_seconds?: number
           id?: string
+          progress_seconds?: number
           thumbnail_url?: string | null
           user_id?: string
           video_id?: string

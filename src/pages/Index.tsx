@@ -7,6 +7,7 @@ import AudioSection from "@/components/AudioSection";
 import AudioPlayer from "@/components/AudioPlayer";
 import CuratedSectionRow from "@/components/CuratedSectionRow";
 import InfiniteVideoGrid from "@/components/InfiniteVideoGrid";
+import DailyDoseHero from "@/components/DailyDoseHero";
 import { type HalalCategory } from "@/services/youtube";
 import { CURATED_SECTIONS } from "@/data/curatedSections";
 import { FeedDiversityProvider, useFeedDiversity } from "@/contexts/FeedDiversityContext";
@@ -40,6 +41,10 @@ const Index = () => {
     <div className="min-h-screen bg-background pb-24">
       <Navbar />
       <HeroSection />
+
+      <DailyDoseHero />
+
+
 
       {/* Main tabs */}
       <div className="sticky top-16 z-40 border-b border-border bg-card/80 backdrop-blur-xl">
