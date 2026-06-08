@@ -42,6 +42,7 @@ const Watch = () => {
   // Listen for YouTube iframe API messages to detect video end
   useEffect(() => {
     setShowOverlay(false);
+    completedRef.current = null;
 
     const handleMessage = (event: MessageEvent) => {
       try {
@@ -50,6 +51,26 @@ const Watch = () => {
           // YouTube iframe API sends playerState: 0 when video ends
           if (data?.event === "onStateChange" && data?.info === 0) {
             setShowOverlay(true);
+            // Mark dose video complete (idempotent server-side)
+            if (user && videoId && completedRef.current !== videoId) {
+              completedRef.current = videoId;
+              completeDose.mutate(videoId, {
+                onSuccess: (res) => {
+                  if (res?.justCompleted) {
+                    toast.success("Alhamdulillah 🌿 Daily Dose complete", {
+                      description: `Streak: ${res.streak?.current_streak ?? 1} day${(res.streak?.current_streak ?? 1) === 1 ? "" : "s"}`,
+                      duration: 6000,
+                    });
+                  }
+                  if (res?.milestone) {
+                    toast(`🌟 ${res.milestone}-day milestone reached!`, {
+                      description: "Keep going — small daily steps, big transformation.",
+                      duration: 8000,
+                    });
+                  }
+                },
+              });
+            }
           }
         }
       } catch {
@@ -59,7 +80,7 @@ const Watch = () => {
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [videoId]);
+  }, [videoId, user, completeDose]);
 
   const handleNext = () => {
     if (nextVideo) {
