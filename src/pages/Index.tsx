@@ -7,6 +7,7 @@ import AudioSection from "@/components/AudioSection";
 import AudioPlayer from "@/components/AudioPlayer";
 import CuratedSectionRow from "@/components/CuratedSectionRow";
 import InfiniteVideoGrid from "@/components/InfiniteVideoGrid";
+import DailyDoseHero from "@/components/DailyDoseHero";
 import { type HalalCategory } from "@/services/youtube";
 import { CURATED_SECTIONS } from "@/data/curatedSections";
 import { FeedDiversityProvider, useFeedDiversity } from "@/contexts/FeedDiversityContext";
