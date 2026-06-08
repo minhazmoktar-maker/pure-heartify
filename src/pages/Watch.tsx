@@ -7,6 +7,8 @@ import { useYouTubeVideos } from "@/hooks/useYouTubeVideos";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useCompleteDoseVideo } from "@/hooks/useDailyDose";
+import { toast } from "sonner";
 
 const Watch = () => {
   const { videoId } = useParams<{ videoId: string }>();
