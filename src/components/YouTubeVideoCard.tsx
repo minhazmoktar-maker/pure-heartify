@@ -56,10 +56,9 @@ const YouTubeVideoCard = ({ video, index }: YouTubeVideoCardProps) => {
           loading="lazy"
           className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        <span className="absolute bottom-2 left-2 flex items-center gap-1 rounded-md bg-primary/90 px-1.5 py-0.5 text-xs font-medium text-primary-foreground">
-          <Shield className="h-3 w-3" />
-          {video.halalScore >= 85 ? ">85% Halal" : `${video.halalScore}% Halal`}
-        </span>
+        <div className="absolute bottom-2 left-2 right-2">
+          <TrustBadges channelTitle={video.channelTitle} halalScore={video.halalScore} />
+        </div>
         <span className="absolute right-2 top-2 rounded-md bg-foreground/70 px-1.5 py-0.5 text-xs font-medium text-background">
           {video.category}
         </span>
