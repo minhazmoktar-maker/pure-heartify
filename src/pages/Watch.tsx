@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Shield, ChevronRight, Heart, Play } from "lucide-react";
+import { ArrowLeft, ChevronRight, Heart, Play } from "lucide-react";
+import TrustBadges from "@/components/TrustBadges";
 import Navbar from "@/components/Navbar";
 import YouTubeVideoCard from "@/components/YouTubeVideoCard";
 import { useYouTubeVideos } from "@/hooks/useYouTubeVideos";
