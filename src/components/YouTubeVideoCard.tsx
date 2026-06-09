@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CheckCircle2, Play, Shield, Heart } from "lucide-react";
+import { CheckCircle2, Play, Heart } from "lucide-react";
 import type { YouTubeVideo } from "@/services/youtube";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useAuth } from "@/contexts/AuthContext";
+import TrustBadges from "@/components/TrustBadges";
 
 interface YouTubeVideoCardProps {
   video: YouTubeVideo;
