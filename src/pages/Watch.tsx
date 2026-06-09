@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Shield, ChevronRight, Heart, Play } from "lucide-react";
+import { ArrowLeft, ChevronRight, Heart, Play } from "lucide-react";
+import TrustBadges from "@/components/TrustBadges";
 import Navbar from "@/components/Navbar";
 import YouTubeVideoCard from "@/components/YouTubeVideoCard";
 import { useYouTubeVideos } from "@/hooks/useYouTubeVideos";
@@ -173,11 +174,12 @@ const Watch = () => {
               {currentVideo && (
                 <>
                   <span className="font-medium text-foreground">{currentVideo.channelTitle}</span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
-                    <Shield className="h-3 w-3" />
-                    {currentVideo.halalScore >= 85 ? ">85% Halal" : `${currentVideo.halalScore}% Halal`}
-                  </span>
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{currentVideo.category}</span>
+                  <TrustBadges
+                    channelTitle={currentVideo.channelTitle}
+                    halalScore={currentVideo.halalScore}
+                    category={currentVideo.category}
+                    size="md"
+                  />
                   <button
                     onClick={handleBookmark}
                     className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-medium transition-colors hover:bg-accent"
