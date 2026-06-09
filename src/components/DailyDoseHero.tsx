@@ -1,12 +1,29 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Sparkles, Clock, CheckCircle2, Flame, PlayCircle } from "lucide-react";
 import { useDailyDose } from "@/hooks/useDailyDose";
+import { useUserInterests } from "@/hooks/useUserInterests";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
 const DailyDoseHero = () => {
   const { user } = useAuth();
   const { data, isLoading } = useDailyDose();
+  const { data: interests, isLoading: interestsLoading } = useUserInterests();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Auto-redirect signed-in users without interests to onboarding (one-time per session).
+  useEffect(() => {
+    if (!user || interestsLoading) return;
+    if (location.pathname !== "/") return;
+    const skipped = sessionStorage.getItem("onboarding-skipped");
+    const hasAny = interests && (interests.primary_interest || interests.secondary_interest || interests.exploration_interest);
+    if (!hasAny && !skipped) {
+      sessionStorage.setItem("onboarding-skipped", "1");
+      navigate("/onboarding");
+    }
+  }, [user, interests, interestsLoading, navigate, location.pathname]);
 
   if (!user) {
     return (
