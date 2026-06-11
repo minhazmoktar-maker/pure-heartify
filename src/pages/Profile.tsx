@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Camera, Loader2, Clock, Bookmark, PlayCircle, Sparkles, Search } from "lucide-react";
+import { ArrowLeft, Camera, Loader2, Clock, Bookmark, PlayCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import EmptyState from "@/components/EmptyState";
 import { useAuth } from "@/contexts/AuthContext";
