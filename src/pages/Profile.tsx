@@ -31,6 +31,10 @@ const Profile = () => {
   const [history, setHistory] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
+  // Continue watching
+  const [continueItems, setContinueItems] = useState<any[]>([]);
+  const [continueLoading, setContinueLoading] = useState(false);
+
   useEffect(() => {
     if (!authLoading && !user) navigate("/login");
   }, [user, authLoading, navigate]);
