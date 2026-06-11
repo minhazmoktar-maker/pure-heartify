@@ -187,11 +187,70 @@ const Profile = () => {
           </div>
         )}
 
+        {/* Continue Watching */}
+        {tab === "continue" && (
+          <div>
+            {continueLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : continueItems.length === 0 ? (
+              <EmptyState
+                icon={PlayCircle}
+                title="Nothing in progress"
+                description="Videos you've started but not finished will appear here so you can pick up where you left off."
+                actionLabel="Start your Daily Dose"
+                actionHref="/"
+              />
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {continueItems.map((h) => {
+                  const pct =
+                    h.duration_seconds && h.duration_seconds > 0
+                      ? Math.min(100, Math.round((h.progress_seconds / h.duration_seconds) * 100))
+                      : 0;
+                  return (
+                    <div
+                      key={h.id}
+                      onClick={() => navigate(`/watch/${h.video_id}`)}
+                      className="flex gap-3 rounded-lg border border-border bg-card p-3 cursor-pointer hover:bg-accent transition-colors"
+                    >
+                      {h.thumbnail_url && (
+                        <div className="relative shrink-0">
+                          <img src={h.thumbnail_url} className="h-20 w-32 rounded object-cover" alt="" />
+                          {pct > 0 && (
+                            <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b bg-black/40">
+                              <div className="h-full rounded-b bg-primary" style={{ width: `${pct}%` }} />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground line-clamp-2">{h.video_title}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{h.channel_title}</p>
+                        {pct > 0 && (
+                          <p className="text-xs text-primary mt-1">{pct}% watched</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Bookmarks */}
         {tab === "favorites" && (
           <div>
             {favorites.length === 0 ? (
-              <p className="py-12 text-center text-muted-foreground">No bookmarks yet. Tap the heart icon on any video to save it.</p>
+              <EmptyState
+                icon={Bookmark}
+                title="No bookmarks yet"
+                description="Tap the bookmark icon on any video to save it for later — across devices."
+                actionLabel="Explore content"
+                actionHref="/"
+              />
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {favorites.map((fav) => (
@@ -222,7 +281,13 @@ const Profile = () => {
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
             ) : history.length === 0 ? (
-              <p className="py-12 text-center text-muted-foreground">No watch history yet.</p>
+              <EmptyState
+                icon={Clock}
+                title="No watch history yet"
+                description="Once you start watching, your recent videos will show up here."
+                actionLabel="Find something beneficial"
+                actionHref="/search"
+              />
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {history.map((h) => (
