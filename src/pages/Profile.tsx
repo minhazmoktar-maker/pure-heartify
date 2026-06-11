@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Camera, Loader2, Trash2, Clock, Bookmark } from "lucide-react";
+import { ArrowLeft, Camera, Loader2, Clock, Bookmark, PlayCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import EmptyState from "@/components/EmptyState";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -11,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-type ProfileTab = "profile" | "favorites" | "history";
+type ProfileTab = "profile" | "continue" | "favorites" | "history";
 
 const Profile = () => {
   const { user, loading: authLoading } = useAuth();
@@ -29,6 +30,10 @@ const Profile = () => {
   // Watch history
   const [history, setHistory] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+
+  // Continue watching
+  const [continueItems, setContinueItems] = useState<any[]>([]);
+  const [continueLoading, setContinueLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/login");
@@ -65,6 +70,24 @@ const Profile = () => {
       .then(({ data }) => {
         setHistory(data ?? []);
         setHistoryLoading(false);
+      });
+  }, [tab, user]);
+
+  // Load Continue Watching
+  useEffect(() => {
+    if (tab !== "continue" || !user) return;
+    setContinueLoading(true);
+    supabase
+      .from("watch_history")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("completed", false)
+      .gt("progress_seconds", 10)
+      .order("watched_at", { ascending: false })
+      .limit(30)
+      .then(({ data }) => {
+        setContinueItems(data ?? []);
+        setContinueLoading(false);
       });
   }, [tab, user]);
 
@@ -106,9 +129,10 @@ const Profile = () => {
         </button>
 
         {/* Tabs */}
-        <div className="flex gap-0 border-b border-border mb-6">
+        <div className="flex gap-0 border-b border-border mb-6 overflow-x-auto">
           {([
             { key: "profile", label: "Profile", icon: Camera },
+            { key: "continue", label: "Continue", icon: PlayCircle },
             { key: "favorites", label: "Bookmarks", icon: Bookmark },
             { key: "history", label: "History", icon: Clock },
           ] as const).map(({ key, label, icon: Icon }) => (
@@ -116,7 +140,7 @@ const Profile = () => {
               key={key}
               onClick={() => setTab(key)}
               className={cn(
-                "flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition-colors",
+                "flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition-colors whitespace-nowrap",
                 tab === key
                   ? "border-primary text-primary"
                   : "border-transparent text-muted-foreground hover:text-foreground"
@@ -163,11 +187,70 @@ const Profile = () => {
           </div>
         )}
 
+        {/* Continue Watching */}
+        {tab === "continue" && (
+          <div>
+            {continueLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : continueItems.length === 0 ? (
+              <EmptyState
+                icon={PlayCircle}
+                title="Nothing in progress"
+                description="Videos you've started but not finished will appear here so you can pick up where you left off."
+                actionLabel="Start your Daily Dose"
+                actionHref="/"
+              />
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {continueItems.map((h) => {
+                  const pct =
+                    h.duration_seconds && h.duration_seconds > 0
+                      ? Math.min(100, Math.round((h.progress_seconds / h.duration_seconds) * 100))
+                      : 0;
+                  return (
+                    <div
+                      key={h.id}
+                      onClick={() => navigate(`/watch/${h.video_id}`)}
+                      className="flex gap-3 rounded-lg border border-border bg-card p-3 cursor-pointer hover:bg-accent transition-colors"
+                    >
+                      {h.thumbnail_url && (
+                        <div className="relative shrink-0">
+                          <img src={h.thumbnail_url} className="h-20 w-32 rounded object-cover" alt="" />
+                          {pct > 0 && (
+                            <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b bg-black/40">
+                              <div className="h-full rounded-b bg-primary" style={{ width: `${pct}%` }} />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground line-clamp-2">{h.video_title}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{h.channel_title}</p>
+                        {pct > 0 && (
+                          <p className="text-xs text-primary mt-1">{pct}% watched</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Bookmarks */}
         {tab === "favorites" && (
           <div>
             {favorites.length === 0 ? (
-              <p className="py-12 text-center text-muted-foreground">No bookmarks yet. Tap the heart icon on any video to save it.</p>
+              <EmptyState
+                icon={Bookmark}
+                title="No bookmarks yet"
+                description="Tap the bookmark icon on any video to save it for later — across devices."
+                actionLabel="Explore content"
+                actionHref="/"
+              />
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {favorites.map((fav) => (
@@ -198,7 +281,13 @@ const Profile = () => {
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
             ) : history.length === 0 ? (
-              <p className="py-12 text-center text-muted-foreground">No watch history yet.</p>
+              <EmptyState
+                icon={Clock}
+                title="No watch history yet"
+                description="Once you start watching, your recent videos will show up here."
+                actionLabel="Find something beneficial"
+                actionHref="/search"
+              />
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {history.map((h) => (
