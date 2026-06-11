@@ -129,9 +129,10 @@ const Profile = () => {
         </button>
 
         {/* Tabs */}
-        <div className="flex gap-0 border-b border-border mb-6">
+        <div className="flex gap-0 border-b border-border mb-6 overflow-x-auto">
           {([
             { key: "profile", label: "Profile", icon: Camera },
+            { key: "continue", label: "Continue", icon: PlayCircle },
             { key: "favorites", label: "Bookmarks", icon: Bookmark },
             { key: "history", label: "History", icon: Clock },
           ] as const).map(({ key, label, icon: Icon }) => (
@@ -139,7 +140,7 @@ const Profile = () => {
               key={key}
               onClick={() => setTab(key)}
               className={cn(
-                "flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition-colors",
+                "flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition-colors whitespace-nowrap",
                 tab === key
                   ? "border-primary text-primary"
                   : "border-transparent text-muted-foreground hover:text-foreground"
