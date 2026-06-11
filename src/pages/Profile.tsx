@@ -73,6 +73,24 @@ const Profile = () => {
       });
   }, [tab, user]);
 
+  // Load Continue Watching
+  useEffect(() => {
+    if (tab !== "continue" || !user) return;
+    setContinueLoading(true);
+    supabase
+      .from("watch_history")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("completed", false)
+      .gt("progress_seconds", 10)
+      .order("watched_at", { ascending: false })
+      .limit(30)
+      .then(({ data }) => {
+        setContinueItems(data ?? []);
+        setContinueLoading(false);
+      });
+  }, [tab, user]);
+
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
