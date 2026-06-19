@@ -22,6 +22,7 @@ import Audit from "./pages/Audit.tsx";
 import Onboarding from "./pages/Onboarding.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { MobileBridge } from "./components/MobileBridge";
+import ReferralBridge from "./components/ReferralBridge";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <MobileBridge />
+            <ReferralBridge />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/watch/:videoId" element={<Watch />} />

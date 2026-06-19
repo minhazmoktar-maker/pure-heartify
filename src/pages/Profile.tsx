@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Camera, Loader2, Clock, Bookmark, PlayCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import EmptyState from "@/components/EmptyState";
+import ReferralCard from "@/components/ReferralCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useFavorites } from "@/hooks/useFavorites";
