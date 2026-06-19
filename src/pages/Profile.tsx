@@ -222,7 +222,7 @@ const Profile = () => {
                     >
                       {h.thumbnail_url && (
                         <div className="relative shrink-0">
-                          <img src={h.thumbnail_url} className="h-20 w-32 rounded object-cover" alt="" />
+                          <img src={h.thumbnail_url} className="h-20 w-32 rounded object-cover bg-muted" alt="" loading="lazy" decoding="async" />
                           {pct > 0 && (
                             <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b bg-black/40">
                               <div className="h-full rounded-b bg-primary" style={{ width: `${pct}%` }} />
@@ -265,7 +265,7 @@ const Profile = () => {
                     className="flex gap-3 rounded-lg border border-border bg-card p-3 cursor-pointer hover:bg-accent transition-colors"
                   >
                     {fav.thumbnail_url && (
-                      <img src={fav.thumbnail_url} className="h-20 w-32 rounded object-cover shrink-0" alt="" />
+                      <img src={fav.thumbnail_url} className="h-20 w-32 rounded object-cover shrink-0 bg-muted" alt="" loading="lazy" decoding="async" />
                     )}
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-foreground line-clamp-2">{fav.video_title}</p>
@@ -302,7 +302,7 @@ const Profile = () => {
                     className="flex gap-3 rounded-lg border border-border bg-card p-3 cursor-pointer hover:bg-accent transition-colors"
                   >
                     {h.thumbnail_url && (
-                      <img src={h.thumbnail_url} className="h-20 w-32 rounded object-cover shrink-0" alt="" />
+                      <img src={h.thumbnail_url} className="h-20 w-32 rounded object-cover shrink-0 bg-muted" alt="" loading="lazy" decoding="async" />
                     )}
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-foreground line-clamp-2">{h.video_title}</p>

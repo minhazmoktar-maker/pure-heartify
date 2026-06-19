@@ -54,7 +54,8 @@ const YouTubeVideoCard = ({ video, index }: YouTubeVideoCardProps) => {
           src={video.thumbnailUrl}
           alt={video.title}
           loading="lazy"
-          className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          decoding="async"
+          className="aspect-video w-full bg-muted object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute bottom-2 left-2 right-2">
           <TrustBadges channelTitle={video.channelTitle} halalScore={video.halalScore} />
