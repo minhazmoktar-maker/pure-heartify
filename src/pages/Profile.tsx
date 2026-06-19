@@ -185,6 +185,10 @@ const Profile = () => {
               {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Save Changes
             </Button>
+
+            <div className="pt-4">
+              <ReferralCard />
+            </div>
           </div>
         )}
 
