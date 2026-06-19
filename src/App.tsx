@@ -1,5 +1,7 @@
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,24 +9,32 @@ import { PlayerProvider } from "@/contexts/PlayerContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import Index from "./pages/Index.tsx";
-import Watch from "./pages/Watch.tsx";
-import SearchResults from "./pages/SearchResults.tsx";
-import SectionAll from "./pages/SectionAll.tsx";
 import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
-import ForgotPassword from "./pages/ForgotPassword.tsx";
-import ResetPassword from "./pages/ResetPassword.tsx";
-import Privacy from "./pages/Privacy.tsx";
-import Profile from "./pages/Profile.tsx";
-import Channels from "./pages/Channels.tsx";
-import ModerationLog from "./pages/ModerationLog.tsx";
-import Audit from "./pages/Audit.tsx";
-import Onboarding from "./pages/Onboarding.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { MobileBridge } from "./components/MobileBridge";
 import ReferralBridge from "./components/ReferralBridge";
 
+// Code-split everything else
+const Watch = lazy(() => import("./pages/Watch.tsx"));
+const SearchResults = lazy(() => import("./pages/SearchResults.tsx"));
+const SectionAll = lazy(() => import("./pages/SectionAll.tsx"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword.tsx"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
+const Privacy = lazy(() => import("./pages/Privacy.tsx"));
+const Profile = lazy(() => import("./pages/Profile.tsx"));
+const Onboarding = lazy(() => import("./pages/Onboarding.tsx"));
+const Channels = lazy(() => import("./pages/Channels.tsx"));
+const ModerationLog = lazy(() => import("./pages/ModerationLog.tsx"));
+const Audit = lazy(() => import("./pages/Audit.tsx"));
+
 const queryClient = new QueryClient();
+
+const RouteFallback = () => (
+  <div className="flex min-h-screen items-center justify-center bg-background">
+    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -37,23 +47,25 @@ const App = () => (
           <BrowserRouter>
             <MobileBridge />
             <ReferralBridge />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/watch/:videoId" element={<Watch />} />
-              <Route path="/search" element={<SearchResults />} />
-              <Route path="/section/:sectionId" element={<SectionAll />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/onboarding" element={<Onboarding />} />
-              <Route path="/channels" element={<Channels />} />
-              <Route path="/admin/moderation" element={<ModerationLog />} />
-              <Route path="/admin/audit" element={<Audit />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <Suspense fallback={<RouteFallback />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/watch/:videoId" element={<Watch />} />
+                <Route path="/search" element={<SearchResults />} />
+                <Route path="/section/:sectionId" element={<SectionAll />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/channels" element={<Channels />} />
+                <Route path="/admin/moderation" element={<ModerationLog />} />
+                <Route path="/admin/audit" element={<Audit />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
         </PlayerProvider>
       </AuthProvider>
