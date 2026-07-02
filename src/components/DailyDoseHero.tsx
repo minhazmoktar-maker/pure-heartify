@@ -150,7 +150,7 @@ const DailyDoseHero = () => {
                       </span>
                       {v.halal_score && v.halal_score >= 85 && (
                         <span className="rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-medium text-foreground">
-                          Halal-Friendly
+                          Up to 85% halal
                         </span>
                       )}
                     </div>
