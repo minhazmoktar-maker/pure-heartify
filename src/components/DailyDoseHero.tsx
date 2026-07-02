@@ -129,7 +129,7 @@ const DailyDoseHero = () => {
                       className="h-full w-full object-cover"
                     />
                     {completed ? (
-                      <div className="absolute inset-0 flex items-center justify-center bg-primary/70">
+                      <div className="absolute inset-0 flex items-center justify-center bg-primary/70 motion-safe:animate-scale-in">
                         <CheckCircle2 className="h-7 w-7 text-primary-foreground" />
                       </div>
                     ) : (
