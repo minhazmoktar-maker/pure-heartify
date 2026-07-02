@@ -66,8 +66,9 @@ const DailyDoseHero = () => {
   const allDone = done >= total && total > 0;
 
   return (
-    <section className="mx-auto mt-6 max-w-[1800px] px-4 md:px-6">
-      <div className="overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-card shadow-card">
+    <section className="mx-auto mt-6 max-w-[1800px] px-4 md:px-6 motion-safe:animate-fade-in">
+      <div className="overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-card shadow-card transition-shadow duration-500 hover:shadow-card-hover motion-reduce:transition-none">
+
         <div className="flex flex-col gap-5 p-6 md:p-7">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0">
@@ -100,7 +101,7 @@ const DailyDoseHero = () => {
           {/* Progress bar */}
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
             <div
-              className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-700"
+              className="h-full bg-gradient-to-r from-primary to-accent transition-[width] duration-1000 ease-out will-change-[width] motion-reduce:transition-none"
               style={{ width: `${pct}%` }}
             />
           </div>
@@ -113,8 +114,9 @@ const DailyDoseHero = () => {
                 <Link
                   key={v.video_id}
                   to={`/watch/${v.video_id}`}
+                  style={{ animationDelay: `${i * 90}ms` }}
                   className={cn(
-                    "group relative flex gap-3 rounded-xl border border-border bg-background/60 p-2.5 transition-all hover:border-primary/40 hover:shadow-card-hover",
+                    "group relative flex gap-3 rounded-xl border border-border bg-background/60 p-2.5 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-card-hover motion-safe:animate-fade-in motion-reduce:transform-none motion-reduce:transition-none",
                     completed && "opacity-70",
                   )}
                 >
