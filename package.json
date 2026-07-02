@@ -10,7 +10,11 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "cap:smoke": "bash scripts/cap-smoke.sh",
+    "cap:sync": "npm run cap:smoke && npm run build && npx cap sync",
+    "cap:ios": "npm run cap:sync && npx cap run ios",
+    "cap:android": "npm run cap:sync && npx cap run android"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
