@@ -37,7 +37,7 @@ const TrustBadges = ({ channelTitle, halalScore, category, size = "sm", classNam
   if (highScore && !trusted) {
     tags.push({
       icon: <Sparkles className={size === "sm" ? "h-3 w-3" : "h-3.5 w-3.5"} />,
-      label: "Halal-Friendly",
+      label: "Up to 85% halal",
       tone: "accent",
     });
   }

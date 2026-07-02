@@ -6,6 +6,8 @@ import Navbar from "@/components/Navbar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ShieldAlert } from "lucide-react";
+import { track } from "@/lib/analytics";
+import { toast } from "@/components/ui/use-toast";
 
 interface ModerationRow {
   id: string;
@@ -40,6 +42,7 @@ const ModerationLog = () => {
 
   useEffect(() => {
     if (!user) return;
+    track("moderation_log_view");
     (async () => {
       setLoading(true);
       const { data, error } = await supabase
@@ -49,8 +52,12 @@ const ModerationLog = () => {
         .limit(500);
       if (error) {
         setForbidden(true);
+        track("moderation_log_load_failed", { error: error.message });
+        toast({ title: "Couldn't load moderation log", description: error.message, variant: "destructive" });
       } else {
-        setRows((data ?? []) as ModerationRow[]);
+        const rows = (data ?? []) as ModerationRow[];
+        setRows(rows);
+        track("moderation_log_loaded", { count: rows.length });
       }
       setLoading(false);
     })();

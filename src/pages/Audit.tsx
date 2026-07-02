@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,6 +6,8 @@ import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ShieldCheck, AlertTriangle, ImageOff } from "lucide-react";
+import { track } from "@/lib/analytics";
+import { toast } from "@/components/ui/use-toast";
 
 interface Report {
   ok: boolean;
@@ -30,13 +32,40 @@ const AuditPage = () => {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
+  useEffect(() => {
+    track("audit_page_view");
+  }, []);
+
   const run = async (deleteFlagged: boolean) => {
     setLoading(true); setErr(null); setReport(null);
+    const startedAt = Date.now();
+    track("audit_run_started", { delete_flagged: deleteFlagged });
     const { data, error } = await supabase.functions.invoke("audit-compliance", {
       body: { limit: 5000, thumb_sample: 50, delete_flagged: deleteFlagged },
     });
-    if (error) setErr(error.message);
-    else setReport(data as Report);
+    if (error) {
+      setErr(error.message);
+      track("audit_run_failed", { delete_flagged: deleteFlagged, error: error.message, duration_ms: Date.now() - startedAt });
+      toast({ title: "Audit failed", description: error.message, variant: "destructive" });
+    } else {
+      const r = data as Report;
+      setReport(r);
+      track("audit_run_completed", {
+        delete_flagged: deleteFlagged,
+        scanned: r.scanned,
+        flagged: r.flagged_count,
+        flagged_pct: r.flagged_pct,
+        broken_thumbs: r.thumbnails_broken,
+        deleted: r.deleted,
+        duration_ms: Date.now() - startedAt,
+      });
+      if (r.flagged_pct > 1 || r.thumbnails_broken > 0) {
+        toast({
+          title: "Audit finished with warnings",
+          description: `${r.flagged_count} flagged (${r.flagged_pct}%), ${r.thumbnails_broken} broken thumbnails.`,
+        });
+      }
+    }
     setLoading(false);
   };
 

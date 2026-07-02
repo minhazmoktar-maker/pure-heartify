@@ -46,18 +46,20 @@ const SearchResults = () => {
           </>
         ) : (
           <>
-            <div className="mb-6 flex items-center gap-3">
-              <Search className="h-6 w-6 text-primary" />
-              <div>
-                <h1 className="text-xl font-bold text-foreground">Search Heartify</h1>
-                <p className="text-sm text-muted-foreground">Discover trusted creators, topics, and reminders</p>
+            <div className="mb-6 flex items-start gap-3 sm:items-center">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <Search className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-lg font-bold text-foreground sm:text-xl">Search Heartify</h1>
+                <p className="text-xs text-muted-foreground sm:text-sm">Discover trusted creators, topics, and reminders</p>
               </div>
             </div>
             <SearchSuggestions />
-            <div className="mt-10">
+            <div className="mt-8 sm:mt-10">
               <EmptyState
                 title="Type a topic, surah, or creator name"
-                description="Heartify only shows content that passes our halal review pipeline."
+                description="Every result passes our halal review pipeline — up to 85% halal score."
               />
             </div>
           </>
