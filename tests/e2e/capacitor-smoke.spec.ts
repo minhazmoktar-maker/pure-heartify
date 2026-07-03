@@ -83,8 +83,8 @@ test.describe("Capacitor smoke", () => {
     expect(after).toBeGreaterThan(initial);
   });
 
-  test("video playback uses embedded in-app player", async ({ page }) => {
-    // Navigate via home to pick a real video id
+  test("video playback uses embedded in-app player and never navigates away", async ({ page }) => {
+    const guard = installPlaybackOriginGuard(page);
     await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
     const firstCard = page.locator('a[href^="/watch/"]').first();
     await firstCard.waitFor({ state: "visible", timeout: 30_000 });
@@ -96,7 +96,19 @@ test.describe("Capacitor smoke", () => {
     const src = await iframe.getAttribute("src");
     expect(src).toContain("rel=0");
     expect(src).toContain("modestbranding=1");
-    // Must NOT be a redirect to youtube.com watch page
+
+    // Simulate a slow load / retry: wait, then re-verify the embed is still the source of truth.
+    await page.waitForTimeout(4000);
+    await expect(iframe).toBeVisible();
+    const srcAfter = await iframe.getAttribute("src");
+    expect(srcAfter).toMatch(/^https:\/\/www\.youtube-nocookie\.com\/embed\//);
+
+    // Attempt to interact with the player area; must not navigate off the embed.
+    await iframe.click({ trial: true }).catch(() => undefined);
+    await page.waitForTimeout(1500);
+
     expect(page.url()).not.toContain("youtube.com/watch");
+    expect(page.url()).not.toContain("youtu.be/");
+    guard.assertClean();
   });
 });
