@@ -60,15 +60,14 @@ test.describe("Capacitor smoke", () => {
     expect(count).toBeGreaterThan(3);
   });
 
-  test("home feed loads more videos on scroll", async ({ page }) => {
+  test("home feed loads more videos on scroll without leaving the app", async ({ page }) => {
+    const guard = installPlaybackOriginGuard(page);
     await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
-    // Switch to Browse tab which uses InfiniteVideoGrid
     await page.getByRole("button", { name: /browse/i }).first().click();
     const thumbSel = 'img[src*="ytimg.com"], img[src*="youtube.com"]';
     await page.locator(thumbSel).first().waitFor({ state: "visible", timeout: 30_000 });
     const initial = await page.locator(thumbSel).count();
 
-    // Scroll to trigger infinite scroll sentinel
     for (let i = 0; i < 6; i++) {
       await page.mouse.wheel(0, 4000);
       await page.waitForTimeout(600);
@@ -81,6 +80,7 @@ test.describe("Capacitor smoke", () => {
     );
     const after = await page.locator(thumbSel).count();
     expect(after).toBeGreaterThan(initial);
+    guard.assertClean();
   });
 
   test("video playback uses embedded in-app player and never navigates away", async ({ page }) => {
