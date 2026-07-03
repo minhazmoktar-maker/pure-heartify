@@ -143,6 +143,20 @@ jobs:
           npm run build
           npx cap add android || true
           npx cap sync android
+      - name: Bump Android versionCode + versionName
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VNAME="${GITHUB_REF#refs/tags/v}"
+          else
+            VNAME="1.0.${RUN_NUMBER}"
+          fi
+          GRADLE=android/app/build.gradle
+          # versionCode must be a strictly increasing integer per Play upload.
+          sed -i -E "s/versionCode[[:space:]]+[0-9]+/versionCode ${RUN_NUMBER}/" "$GRADLE"
+          sed -i -E "s/versionName[[:space:]]+\"[^\"]+\"/versionName \"${VNAME}\"/" "$GRADLE"
+          echo "── Version block ──"; grep -E "versionCode|versionName" "$GRADLE"
       - name: Decode upload keystore
         env:
           KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
@@ -160,3 +174,22 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           PLAY_SERVICE_ACCOUNT_JSON_PATH: ${{ github.workspace }}/android/play-service-account.json
         run: bundle exec fastlane internal
+      - name: Upload Android AAB artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: |
+            android/app/build/outputs/bundle/release/*.aab
+            android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Notify Slack on Android failure
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -sS -X POST -H 'Content-Type: application/json' \
+            --data "{\"text\":\":rotating_light: *Android Play Internal release failed* — <${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}|view run>\"}" \
+            "$SLACK_WEBHOOK_URL"
+
