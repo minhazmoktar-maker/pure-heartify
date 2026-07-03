@@ -1,0 +1,128 @@
+name: Mobile Release (TestFlight + Play Internal)
+
+# Builds iOS + Android and uploads to TestFlight / Play Internal Testing.
+# Gated on cap:smoke passing. Runs on release tags (v*) and manual dispatch.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      lane:
+        description: "Which store(s) to release to"
+        required: true
+        default: both
+        type: choice
+        options: [both, ios, android]
+
+jobs:
+  # ─────────────────────────────────────────────
+  # Gate: smoke must pass before any native build
+  # ─────────────────────────────────────────────
+  smoke:
+    name: Smoke gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run cap:smoke
+
+  # ─────────────────────────────────────────────
+  # iOS → TestFlight via Fastlane pilot
+  # Required repo secrets:
+  #   APP_STORE_CONNECT_API_KEY_ID
+  #   APP_STORE_CONNECT_API_ISSUER_ID
+  #   APP_STORE_CONNECT_API_KEY_B64   (base64 of the .p8)
+  #   MATCH_PASSWORD                  (fastlane match encryption)
+  #   MATCH_GIT_URL                   (private repo of signing certs)
+  #   MATCH_GIT_BASIC_AUTHORIZATION   (base64 user:token for match repo)
+  #   IOS_TEAM_ID
+  # ─────────────────────────────────────────────
+  ios:
+    name: iOS → TestFlight
+    needs: smoke
+    if: ${{ github.event_name == 'push' || inputs.lane == 'both' || inputs.lane == 'ios' }}
+    runs-on: macos-14
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - uses: ruby/setup-ruby@v1
+        with: { ruby-version: "3.2", bundler-cache: true }
+      - name: Install dependencies
+        run: npm ci
+      - name: Build web + Capacitor sync
+        run: |
+          npm run build
+          npx cap add ios || true
+          npx cap sync ios
+      - name: Decode App Store Connect API key
+        env:
+          KEY_B64: ${{ secrets.APP_STORE_CONNECT_API_KEY_B64 }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$KEY_B64" | base64 --decode > ~/.appstoreconnect/api_key.p8
+      - name: Deploy to TestFlight
+        working-directory: ios/App
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_PATH: ~/.appstoreconnect/api_key.p8
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+        run: bundle exec fastlane beta
+
+  # ─────────────────────────────────────────────
+  # Android → Play Internal Testing
+  # Required repo secrets:
+  #   ANDROID_KEYSTORE_B64            (base64 of upload keystore .jks)
+  #   ANDROID_KEYSTORE_PASSWORD
+  #   ANDROID_KEY_ALIAS
+  #   ANDROID_KEY_PASSWORD
+  #   PLAY_SERVICE_ACCOUNT_JSON       (service account JSON, raw)
+  # ─────────────────────────────────────────────
+  android:
+    name: Android → Play Internal
+    needs: smoke
+    if: ${{ github.event_name == 'push' || inputs.lane == 'both' || inputs.lane == 'android' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - uses: ruby/setup-ruby@v1
+        with: { ruby-version: "3.2", bundler-cache: true }
+      - name: Install dependencies
+        run: npm ci
+      - name: Build web + Capacitor sync
+        run: |
+          npm run build
+          npx cap add android || true
+          npx cap sync android
+      - name: Decode upload keystore
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: echo "$KS_B64" | base64 --decode > android/app/upload-keystore.jks
+      - name: Write Play service account JSON
+        env:
+          SA_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: echo "$SA_JSON" > android/play-service-account.json
+      - name: Deploy to Play Internal Testing
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android/app/upload-keystore.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          PLAY_SERVICE_ACCOUNT_JSON_PATH: ${{ github.workspace }}/android/play-service-account.json
+        run: bundle exec fastlane internal

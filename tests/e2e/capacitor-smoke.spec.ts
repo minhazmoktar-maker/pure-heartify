@@ -31,6 +31,29 @@ test.describe("Capacitor smoke", () => {
     expect(count).toBeGreaterThan(3);
   });
 
+  test("home feed loads more videos on scroll", async ({ page }) => {
+    await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
+    // Switch to Browse tab which uses InfiniteVideoGrid
+    await page.getByRole("button", { name: /browse/i }).first().click();
+    const thumbSel = 'img[src*="ytimg.com"], img[src*="youtube.com"]';
+    await page.locator(thumbSel).first().waitFor({ state: "visible", timeout: 30_000 });
+    const initial = await page.locator(thumbSel).count();
+
+    // Scroll to trigger infinite scroll sentinel
+    for (let i = 0; i < 6; i++) {
+      await page.mouse.wheel(0, 4000);
+      await page.waitForTimeout(600);
+    }
+
+    await page.waitForFunction(
+      ({ sel, initial }) => document.querySelectorAll(sel).length > initial,
+      { sel: thumbSel, initial },
+      { timeout: 20_000 },
+    );
+    const after = await page.locator(thumbSel).count();
+    expect(after).toBeGreaterThan(initial);
+  });
+
   test("video playback uses embedded in-app player", async ({ page }) => {
     // Navigate via home to pick a real video id
     await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
