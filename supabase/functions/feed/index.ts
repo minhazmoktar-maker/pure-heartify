@@ -57,6 +57,16 @@ Deno.serve(async (req) => {
       url += `&or=(title.ilike.*${encodeURIComponent(search)}*,channel_title.ilike.*${encodeURIComponent(search)}*)`;
     }
 
+    // Belt-and-suspenders moderation guard: even though a DB trigger blocks
+    // inserts and a nightly sweep purges rows, we also filter at read time so
+    // any race, cache, or manual insert can never surface blocked creators.
+    const BLOCKED_PATTERNS = ["mia yilin", "leila hormozi", "layla hormozi", "mehreen"];
+    for (const p of BLOCKED_PATTERNS) {
+      url += `&channel_title=not.ilike.*${encodeURIComponent(p)}*`;
+      url += `&title=not.ilike.*${encodeURIComponent(p)}*`;
+    }
+
+
     const res = await fetch(url, {
       headers: {
         "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
