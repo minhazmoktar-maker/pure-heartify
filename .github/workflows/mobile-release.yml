@@ -61,6 +61,21 @@ jobs:
           npm run build
           npx cap add ios || true
           npx cap sync ios
+      - name: Bump iOS marketing + build number
+        working-directory: ios/App
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          # Marketing version comes from the git tag (v1.2.3 → 1.2.3), or falls
+          # back to 1.0.<run_number> on manual dispatch.
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            MARKETING="${GITHUB_REF#refs/tags/v}"
+          else
+            MARKETING="1.0.${RUN_NUMBER}"
+          fi
+          xcrun agvtool new-marketing-version "$MARKETING"
+          # Build number must be strictly increasing per TestFlight upload.
+          xcrun agvtool new-version -all "${RUN_NUMBER}"
       - name: Decode App Store Connect API key
         env:
           KEY_B64: ${{ secrets.APP_STORE_CONNECT_API_KEY_B64 }}
@@ -78,6 +93,25 @@ jobs:
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
         run: bundle exec fastlane beta
+      - name: Upload iOS IPA artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: |
+            ios/App/build/**/*.ipa
+            ios/App/*.ipa
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Notify Slack on iOS failure
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -sS -X POST -H 'Content-Type: application/json' \
+            --data "{\"text\":\":rotating_light: *iOS TestFlight release failed* — <${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}|view run>\"}" \
+            "$SLACK_WEBHOOK_URL"
+
 
   # ─────────────────────────────────────────────
   # Android → Play Internal Testing
