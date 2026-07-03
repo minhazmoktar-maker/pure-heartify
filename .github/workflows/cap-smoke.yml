@@ -27,3 +27,33 @@ jobs:
           name: playwright-report
           path: playwright-report
           retention-days: 7
+
+      # ─────────── Failure notifications ───────────
+      # Configure ONE (or both) of these repo secrets to receive alerts:
+      #   SLACK_WEBHOOK_URL  — Slack Incoming Webhook URL
+      #   ALERT_EMAIL_TO / SMTP_SERVER / SMTP_PORT / SMTP_USERNAME / SMTP_PASSWORD
+      - name: Notify Slack on failure
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -sS -X POST -H 'Content-Type: application/json' \
+            --data "{\"text\":\":rotating_light: *cap:smoke failed* on \`${GITHUB_REF#refs/heads/}\` — <${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}|view run>\"}" \
+            "$SLACK_WEBHOOK_URL"
+      - name: Notify email on failure
+        if: failure() && env.ALERT_EMAIL_TO != ''
+        uses: dawidd6/action-send-mail@v3
+        env:
+          ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "[Heartify] cap:smoke failed on ${{ github.ref_name }}"
+          to: ${{ secrets.ALERT_EMAIL_TO }}
+          from: "Heartify CI <${{ secrets.SMTP_USERNAME }}>"
+          body: |
+            The Capacitor smoke test failed.
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Commit: ${{ github.sha }}
