@@ -8,9 +8,38 @@
  *
  * Run automatically via `npm run cap:smoke` before `npx cap sync`.
  */
-import { test, expect } from "../../playwright-fixture";
+import { test, expect, Page } from "../../playwright-fixture";
 
 const BASE = process.env.SMOKE_BASE_URL || "http://localhost:8080";
+
+/**
+ * Hard guard: fail the test if the top-level page ever navigates away from
+ * the embedded in-app player. Any redirect to youtube.com/watch, m.youtube.com,
+ * or youtu.be is a policy violation, even under retries or slow loads.
+ */
+function installPlaybackOriginGuard(page: Page) {
+  const violations: string[] = [];
+  const forbidden = [
+    /https?:\/\/(www\.|m\.)?youtube\.com\/watch/i,
+    /https?:\/\/youtu\.be\//i,
+  ];
+  page.on("framenavigated", (frame) => {
+    if (frame !== page.mainFrame()) return;
+    const url = frame.url();
+    if (forbidden.some((re) => re.test(url))) violations.push(url);
+  });
+  page.on("popup", (popup) => {
+    const url = popup.url();
+    if (forbidden.some((re) => re.test(url))) violations.push(`popup:${url}`);
+  });
+  return {
+    assertClean: () =>
+      expect(
+        violations,
+        `top-level navigation left the embedded player: ${violations.join(", ")}`,
+      ).toHaveLength(0),
+  };
+}
 
 test.describe("Capacitor smoke", () => {
   test("login page is interactive", async ({ page }) => {
