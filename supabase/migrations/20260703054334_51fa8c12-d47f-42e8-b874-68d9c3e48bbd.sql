@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.enforce_blocked_creators() FROM PUBLIC, anon, authenticated;

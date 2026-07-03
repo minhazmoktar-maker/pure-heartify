@@ -41,6 +41,27 @@ export type Database = {
         }
         Relationships: []
       }
+      blocked_creators: {
+        Row: {
+          created_at: string
+          id: string
+          pattern: string
+          reason: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pattern: string
+          reason?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pattern?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       channels_state: {
         Row: {
           category: string | null
