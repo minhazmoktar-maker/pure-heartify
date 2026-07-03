@@ -60,6 +60,20 @@ test.describe("Capacitor smoke", () => {
     expect(count).toBeGreaterThan(3);
   });
 
+  test("blocked creators never appear on any surface", async ({ page }) => {
+    const BLOCKED = ["mia yilin", "leila hormozi", "layla hormozi", "mehreen"];
+    const routes = ["/", "/search?q=discipline", "/search?q=motivation", "/channels"];
+    for (const route of routes) {
+      await page.goto(`${BASE}${route}`, { waitUntil: "domcontentloaded" });
+      await page.waitForTimeout(2500);
+      const text = (await page.locator("body").innerText()).toLowerCase();
+      for (const term of BLOCKED) {
+        expect(text, `blocked creator "${term}" leaked into ${route}`).not.toContain(term);
+      }
+    }
+  });
+
+
   test("home feed loads more videos on scroll without leaving the app", async ({ page }) => {
     const guard = installPlaybackOriginGuard(page);
     await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
