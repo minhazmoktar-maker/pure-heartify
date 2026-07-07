@@ -55,6 +55,7 @@ export function normalize(input: string): string {
     .toLowerCase()
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "") // strip diacritics
+    .replace(/['’`]/g, "") // drop apostrophes (qur'an -> quran) before splitting
     .replace(PUNCT_RE, " ")
     .replace(SPACE_RE, " ")
     .trim();
