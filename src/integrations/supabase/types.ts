@@ -394,7 +394,7 @@ export type Database = {
       moderation_overrides: {
         Row: {
           action: string
-          admin_id: string
+          admin_id: string | null
           created_at: string
           id: string
           metadata: Json | null
@@ -403,7 +403,7 @@ export type Database = {
         }
         Insert: {
           action: string
-          admin_id: string
+          admin_id?: string | null
           created_at?: string
           id?: string
           metadata?: Json | null
@@ -412,7 +412,7 @@ export type Database = {
         }
         Update: {
           action?: string
-          admin_id?: string
+          admin_id?: string | null
           created_at?: string
           id?: string
           metadata?: Json | null
@@ -607,6 +607,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      nightly_reaudit_sweep: { Args: never; Returns: Json }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
