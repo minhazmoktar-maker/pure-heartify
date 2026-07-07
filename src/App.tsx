@@ -27,6 +27,7 @@ const Onboarding = lazy(() => import("./pages/Onboarding.tsx"));
 const Channels = lazy(() => import("./pages/Channels.tsx"));
 const ModerationLog = lazy(() => import("./pages/ModerationLog.tsx"));
 const Audit = lazy(() => import("./pages/Audit.tsx"));
+const AdminConsole = lazy(() => import("./pages/AdminConsole.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const App = () => (
                 <Route path="/channels" element={<Channels />} />
                 <Route path="/admin/moderation" element={<ModerationLog />} />
                 <Route path="/admin/audit" element={<Audit />} />
+                <Route path="/admin/console" element={<AdminConsole />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
