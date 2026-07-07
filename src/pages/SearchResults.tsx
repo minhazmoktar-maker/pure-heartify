@@ -22,7 +22,8 @@ const SearchResults = () => {
     if (query) addRecentSearch(query);
   }, [query]);
 
-  const smart = useSmartSearch(query);
+  const activeQuery = query || liveInput;
+  const smart = useSmartSearch(activeQuery);
 
   const smartVideos: YouTubeVideo[] = useMemo(
     () =>
@@ -138,9 +139,9 @@ const SearchResults = () => {
               className="mb-4 w-full rounded-xl border border-border bg-card px-4 py-3 text-base outline-none ring-primary/20 focus:ring-2"
             />
 
-            {liveInput.length >= 2 && useSmartSearch(liveInput).autocomplete.length > 0 && (
+            {liveInput.length >= 2 && smart.autocomplete.length > 0 && (
               <div className="mb-6 flex flex-wrap gap-2">
-                {useSmartSearch(liveInput).autocomplete.map((s) => (
+                {smart.autocomplete.map((s) => (
                   <button
                     key={s}
                     onClick={() => navigate(`/search?q=${encodeURIComponent(s)}`)}
