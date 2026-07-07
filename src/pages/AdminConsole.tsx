@@ -73,7 +73,7 @@ const AdminConsole = () => {
         reason: newReason.trim() || null,
       });
       // Invalidate live caches: purge matching rows now so nothing stale surfaces.
-      await supabase.rpc("nightly_reaudit_sweep").catch(() => null);
+      try { await supabase.rpc("nightly_reaudit_sweep"); } catch { /* best-effort cache invalidation */ }
       track("admin_pattern_blocked", { pattern: p });
       toast({ title: "Pattern blocked", description: `“${p}” added and existing matches purged.` });
       setNewPattern("");
